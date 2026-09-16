@@ -1,0 +1,2532 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Housen Photo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16324F">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Housen">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--hull:#16324F;--steel:#5E6B75;--deck:#E9EDF0;--paper:#fff;--line:#CDD5DB;--signal:#F0B400;--rust:#B8401F;--ink:#1B2530;--head:#F4F6F8;--sea:#2E6E8E}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;width:100%;overflow:hidden;overscroll-behavior:none}
+body{height:100vh;height:100dvh;font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;background:var(--deck);color:var(--ink);font-size:15px;line-height:1.5;display:flex;flex-direction:column;-webkit-text-size-adjust:100%}
+button,select,input,textarea{font:inherit;color:inherit}
+input,select,textarea{font-size:16px}
+button,.btn{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+button:hover:not(:disabled),.btn:hover{border-color:var(--steel)}
+button:disabled{opacity:.45;cursor:default}
+.primary{background:var(--hull);color:#fff;border-color:var(--hull)}
+.danger{color:var(--rust);border-color:#E3B8AA}
+:focus-visible{outline:3px solid var(--signal);outline-offset:1px}
+.hint{font-size:13px;color:var(--steel)}
+.sp{flex:1}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0}
+
+.top{display:flex;gap:10px;align-items:center;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));background:var(--hull);color:#fff;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px;letter-spacing:.04em;margin-right:4px}
+.top select{background:#0F2640;color:#fff;border:1px solid #3B5673;border-radius:6px;padding:7px 10px;min-width:240px;max-width:100%}
+.top .actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.top button,.top .btn{background:transparent;color:#fff;border-color:#3B5673}
+.top .primary{background:var(--signal);color:var(--ink);border-color:var(--signal);font-weight:700}
+.notice{background:#FFF3CD;color:#5A4500;padding:8px 16px;font-size:13px}
+
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 380px;min-height:0;min-width:0}
+main>*,.pv>*,.asg>*,.cmpbody>*,.grid2>*,.grid3>*{min-width:0}
+.pane{min-height:0;overflow:auto}
+#matrixPane{padding:16px 20px}
+#trayPane{background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column}
+
+.phead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:2px 0 10px}
+.phead h1{margin:0;font-size:26px;letter-spacing:.02em;color:var(--hull)}
+.pmeta{color:var(--steel);font-size:14px}
+.mtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px;font-size:13px}
+.ctabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 0 8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.ctabs::-webkit-scrollbar{display:none}
+.ctab{flex:0 0 auto;padding:6px 11px;border-radius:16px;font-size:12px;font-weight:700;letter-spacing:.03em;background:var(--paper);color:var(--hull)}
+.ctab span{margin-left:5px;font-size:10px;background:var(--deck);border-radius:8px;padding:0 5px;font-weight:400}
+.ctab.on{background:var(--hull);color:#fff;border-color:var(--hull)}
+.ctab.on span{background:rgba(255,255,255,.2)}
+.ln{word-break:break-word}
+.lc{display:block;font-size:9px;color:var(--steel);font-weight:400;letter-spacing:.04em}
+.cell .dot{position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%;background:var(--rust);box-shadow:0 0 0 1.5px #fff}
+.todo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#FBEAE4;border:1px solid #EFC6B8;border-radius:8px;padding:6px 10px;margin:0 0 8px;font-size:13px}
+.todo>span:first-child{color:var(--rust);font-weight:700}
+.todo b{font-weight:700;color:var(--ink)}
+.todo button{padding:5px 10px;font-size:13px}
+.trayhead .todo{margin:0 0 8px}
+.tag.fl{background:#FBEAE4;color:var(--rust)}
+.th .nc{position:absolute;right:0;bottom:0;background:var(--rust);color:#fff;font-size:9px;padding:0 3px}
+#pvFlags .tag{margin-left:4px}
+#camBurst{flex:0 0 auto}
+#camBurst.on{background:var(--signal);color:var(--ink);border-color:var(--signal);font-weight:700}
+.shotwrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+#camMode{font-size:11px;color:var(--signal);min-height:1em;font-weight:700}
+#camPend{font-size:11px;color:#C9D3DC}
+.mtools button{padding:5px 10px;font-size:13px}
+.welcome{max-width:520px;margin:10vh auto;text-align:center;padding:0 16px}
+.welcome h2{color:var(--hull);margin:0 0 8px}
+.welcome p{color:var(--steel)}
+
+#assignBanner{position:sticky;top:0;left:0;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--signal);color:var(--ink);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
+#assignBanner button{font-weight:400}
+
+.mwrap{overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:8px;max-width:100%;width:max-content;max-height:calc(100vh - 210px);max-height:calc(100dvh - 210px);-webkit-overflow-scrolling:touch}
+table.mx{border-collapse:separate;border-spacing:0}
+.mx th,.mx td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0}
+.mx thead th{position:sticky;top:0;background:var(--head);z-index:3;font-size:11px;padding:5px 2px;min-width:60px;max-width:60px;text-align:center;line-height:1.25;white-space:normal}
+.mx thead th.none{color:var(--steel);font-weight:400}
+.mx tbody th{position:sticky;left:0;background:var(--head);z-index:2;text-align:left;padding:3px 8px;font-size:12px;line-height:1.25;min-width:170px;max-width:170px;font-weight:700}
+.mx thead th.corner{left:0;z-index:4;text-align:left;color:var(--steel);font-weight:400;padding-left:8px;min-width:170px;max-width:170px}
+.mx tr.grp th,.mx tr.grp td{background:var(--hull);color:#fff;border-color:#2A4A6B}
+.mx tr.grp th{padding:0}
+.catbtn{display:flex;width:100%;gap:8px;align-items:center;background:transparent;border:0;color:#fff;padding:6px 10px;font-size:13px;font-weight:700;letter-spacing:.03em;text-align:left;border-radius:0}
+.catbtn .n{margin-left:auto;font-weight:400;font-size:12px;opacity:.85}
+.rowcount{font-size:10px;color:var(--steel);font-weight:400;margin-left:4px}
+.cell{display:block;width:60px;height:44px;border:0;border-radius:0;padding:0;position:relative;background:var(--paper);overflow:hidden}
+.cell img{width:100%;height:100%;object-fit:cover;display:block}
+.cell .cnt{position:absolute;right:3px;bottom:3px;background:var(--hull);color:#fff;font-size:11px;border-radius:10px;padding:0 6px;font-weight:700}
+.cell:hover{background:#F2F6F9}
+.assigning .cell{background:repeating-linear-gradient(-45deg,#FFF3C9 0 8px,#fff 8px 16px)}
+.assigning .cell img{opacity:.55}
+.assigning .cell:hover{box-shadow:inset 0 0 0 4px var(--signal)}
+.bd{display:inline-block;font-style:normal;font-size:10px;font-weight:700;line-height:15px;width:15px;text-align:center;border-radius:3px;margin-left:3px;vertical-align:1px;color:#fff}
+.bd.enc{background:var(--sea)}.bd.dan{background:var(--rust)}.bd.per{background:#7A5A00}
+
+.trayhead{padding:12px 14px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:2}
+.trayhead h2{font-size:15px;margin:0 0 6px;color:var(--hull)}
+.gap{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--steel)}
+.gap input{flex:1}
+#tray{padding:4px 14px 16px;flex:1}
+.group{padding:10px 0;border-bottom:1px dashed var(--line)}
+.ghead{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;cursor:pointer}
+.ghead input{width:18px;height:18px;margin:0}
+.gcount{color:var(--steel);margin-left:auto}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px}
+.th{position:relative;aspect-ratio:4/3;border:2px solid transparent;border-radius:4px;overflow:hidden;background:var(--deck);cursor:pointer}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th .t{position:absolute;left:0;bottom:0;background:rgba(22,50,79,.82);color:#fff;font-size:11px;padding:0 4px}
+.th.on{border-color:var(--signal);box-shadow:0 0 0 2px var(--signal)}
+.th.on::after{content:"✓";position:absolute;top:3px;left:3px;background:var(--signal);color:var(--ink);width:20px;height:20px;border-radius:50%;font-size:13px;font-weight:700;display:grid;place-items:center}
+.th .zoom{position:absolute;top:3px;right:3px;width:26px;height:26px;padding:0;border-radius:4px;background:rgba(255,255,255,.92);font-size:13px;line-height:24px}
+.empty{color:var(--steel);padding:20px 2px;font-size:14px}
+#selbar{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 14px;background:var(--signal);font-weight:700}
+#selbar button{font-weight:400}
+#tabs{display:none}
+
+/* 場所ピッカー・項目チップ */
+.lp{display:flex;flex-direction:column;gap:6px;min-height:0}
+.lprow{display:flex;gap:6px}
+.lprow input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:6px}
+.lprow select{flex:0 0 42%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.lplist{overflow:auto;max-height:46vh;max-height:46dvh;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.lpg{position:sticky;top:0;background:var(--hull);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;letter-spacing:.03em}
+.lpi{display:flex;width:100%;align-items:center;gap:6px;border:0;border-bottom:1px solid var(--deck);border-radius:0;text-align:left;padding:9px 10px;background:var(--paper)}
+.lpi small{color:var(--steel);margin-left:auto;font-size:11px}
+.lpi.on{background:#FFF3C9;font-weight:700;box-shadow:inset 4px 0 0 var(--signal)}
+.ichips{display:flex;flex-wrap:wrap;gap:6px}
+.ich{padding:5px 10px;border-radius:14px;font-size:13px;background:var(--paper)}
+.ich.on{background:var(--hull);color:#fff;border-color:var(--hull)}
+
+/* モーダル */
+#modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,30,48,.55);display:grid;place-items:center;z-index:50;padding:16px}
+.dlg{background:var(--paper);border-radius:10px;width:min(580px,100%);max-height:94vh;max-height:94dvh;display:flex;flex-direction:column;min-width:0}
+.dlg.wide{width:min(1120px,100%)}
+.dlg header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlg header h3{margin:0;font-size:16px;color:var(--hull)}
+.dlg header .x{margin-left:auto;padding:4px 10px}
+.dlg .body{padding:16px;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;flex:1;min-height:0}
+.dlg footer{display:flex;gap:8px;align-items:center;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-wrap:wrap}
+.field{display:block;margin-bottom:12px}
+.field>span{display:block;font-size:13px;color:var(--steel);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.err{color:var(--rust);font-size:13px;margin:4px 0 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.asg{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.asg h4,.vm h4{margin:0 0 8px;font-size:14px;color:var(--hull)}
+.vtable{width:100%;border-collapse:collapse;font-size:14px}
+.vtable th,.vtable td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+.vtable th{font-size:12px;color:var(--steel);font-weight:400}
+.tankbox{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.trow{display:flex;gap:10px 14px;align-items:flex-end;flex-wrap:wrap}
+.trow .chk{min-width:150px;font-weight:700;padding-bottom:8px}
+.tf{display:flex;flex-direction:column;font-size:12px;color:var(--steel)}
+.tf input{color:var(--ink);width:170px;padding:7px 9px;border:1px solid var(--line);border-radius:6px}
+.tf select{color:var(--ink);padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tankbox .hint{margin-top:6px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.ci label{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:4px;flex-wrap:wrap}
+.cthumb{padding:0;border:0;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:4px;background:var(--deck)}
+.cthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.tag{font-size:11px;background:var(--deck);color:var(--hull);border-radius:3px;padding:0 5px}
+.tag.ex{background:#F6DDD5;color:var(--rust)}
+
+/* 写真ビューア */
+.pv{display:grid;grid-template-columns:1fr 340px;gap:18px}
+.pvstage{background:#0F1E30;border-radius:6px;display:flex;justify-content:center;align-items:center;min-height:200px;height:62vh;height:62dvh;overflow:hidden}
+.pvstage canvas{max-width:100%;max-height:100%;display:block}
+.pvtools{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.pvpos{font-size:13px;color:var(--steel);margin-left:4px}
+.pno{overflow-wrap:anywhere;font-weight:700;color:var(--hull);font-size:15px;letter-spacing:.02em;word-break:break-all}
+.meta{font-size:12px;color:var(--steel);margin-bottom:12px;word-break:break-all}
+.locbtn{width:100%;text-align:left;display:flex;align-items:center;gap:6px;padding:9px 10px;white-space:normal;flex-wrap:wrap}
+.locbtn small{color:var(--steel)}
+.inlp{margin-top:8px;border:2px solid var(--signal);border-radius:8px;padding:8px}
+
+/* 写真編集 */
+#pe{position:fixed;top:0;left:0;right:0;bottom:0;height:100vh;height:100dvh;z-index:90;background:#0B1624;color:#fff;display:flex;flex-direction:column}
+.pebar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
+.pebar b{flex:1;text-align:center}
+.pebar button{background:transparent;color:#fff;border-color:#3B5673}
+.pebar .primary{background:var(--signal);color:var(--ink);border-color:var(--signal);font-weight:700}
+.pestage{flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pestage canvas{position:absolute;touch-action:none}
+.petools{background:#12233A;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.perow{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none}
+.perow button{background:#1D3654;color:#fff;border-color:#2F4E72;padding:7px 10px;font-size:13px;flex:0 0 auto}
+.perow button.on{background:var(--signal);color:var(--ink);border-color:var(--signal);font-weight:700}
+.perow .sep{width:1px;align-self:stretch;background:#2F4E72;flex:0 0 1px;margin:0 2px}
+.perow label{display:flex;align-items:center;gap:6px;font-size:13px;flex:0 0 auto}
+.perow input[type=range]{width:120px}
+.sw{width:30px;height:30px;padding:0!important;border-radius:50%!important;border:2px solid #fff!important}
+.sw.on{box-shadow:0 0 0 3px var(--signal)}
+
+/* 撮影モード */
+#cam{position:fixed;top:0;left:0;right:0;bottom:0;height:100vh;height:100dvh;background:#000;z-index:80;color:#fff}
+.camstage{position:absolute;inset:0}
+.camstage video,.camstage img{width:100%;height:100%;object-fit:contain;display:block;position:absolute;inset:0;background:#000}
+.camfb{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;color:#C9D3DC;padding:0 24px;line-height:1.6}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s}
+.flash.on{opacity:.8;transition:none}
+.camtop{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;padding:12px;padding-top:max(12px,env(safe-area-inset-top));background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,0))}
+.camtop button{background:rgba(0,0,0,.5);color:#fff;border-color:rgba(255,255,255,.4)}
+#camLocBtn{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;background:rgba(15,38,64,.85)}
+.cambar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;padding-bottom:max(18px,env(safe-area-inset-bottom));background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.7))}
+.camlast{width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px}
+.camlast img{width:52px;height:52px;object-fit:cover;border-radius:6px;border:2px solid #fff}
+.shutter{width:76px;height:76px;border-radius:50%;background:#fff;border:6px solid rgba(255,255,255,.35);background-clip:padding-box;padding:0}
+.shutter:active{transform:scale(.94)}
+.camsheet{position:absolute;left:0;right:0;bottom:0;max-height:66vh;max-height:66dvh;overflow:auto;background:var(--paper);color:var(--ink);border-radius:14px 14px 0 0;padding:12px 14px;padding-bottom:max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.csloc{display:flex;align-items:center;gap:8px;font-size:14px}
+.csloc b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.camsheet textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{padding:4px 10px;border-radius:14px;font-size:13px;background:var(--deck);border-color:var(--deck)}
+.camrow{display:flex;gap:8px}
+.camrow button{flex:1;padding:11px 6px;white-space:normal}
+.camrow .big{padding:14px;font-weight:700;font-size:16px}
+.camrow.sm button{padding:8px 4px;font-size:13px}
+.camrow button{font-size:14px}
+.camsheet .ich{padding:4px 9px;font-size:12px}
+.camsheet .ichips{gap:5px}
+.camsheet .chips button{font-size:12px;padding:3px 9px}
+.camlp{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;padding:12px;padding-top:max(12px,env(safe-area-inset-top));gap:8px;z-index:3}
+.camlp .lp{flex:1}
+.camlp .lplist{max-height:none;flex:1}
+.camlphead{display:flex;gap:8px;align-items:center}
+.camlphead b{flex:1}
+
+#progress{position:fixed;inset:0;background:rgba(15,30,48,.55);display:grid;place-items:center;z-index:95}
+.pbox{background:var(--paper);border-radius:10px;padding:20px 24px;width:min(360px,90vw)}
+.pbox p{margin:0 0 10px}
+.bar{height:8px;background:var(--deck);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--hull);transition:width .2s}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--hull);color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:99;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+#dropHint{position:fixed;inset:12px;border:4px dashed var(--signal);border-radius:14px;background:rgba(22,50,79,.35);z-index:40;display:grid;place-items:center;color:#fff;font-size:22px;font-weight:700;pointer-events:none}
+
+.top{position:relative}
+#menu{position:absolute;right:16px;top:calc(100% - 4px);background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;flex-direction:column;padding:6px;z-index:30;min-width:240px}
+#menu button{background:var(--paper);color:var(--ink);border:0;text-align:left;padding:10px 12px}
+#menu button:hover{background:var(--deck)}
+details summary{cursor:pointer}
+
+/* 比較 */
+#cmp{position:fixed;top:0;left:0;right:0;bottom:0;height:100vh;height:100dvh;z-index:85;background:#0B1624;color:#fff;display:flex;flex-direction:column}
+.cmpbody{flex:1;min-height:0;display:grid;grid-template-columns:1fr 340px}
+.cmppair{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;min-height:0}
+.cmpcol{display:flex;flex-direction:column;min-height:0}
+.cmpcol h4{margin:0 0 6px;font-size:13px;letter-spacing:.05em;color:var(--signal)}
+.cmpimg{flex:1;min-height:0;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cmpimg canvas{max-width:100%;max-height:100%}
+.cmpcap{font-size:12px;color:#C9D3DC;margin-top:6px;min-height:3em;white-space:pre-wrap}
+.cmplist{background:var(--paper);color:var(--ink);overflow:auto;padding:10px}
+.cmpv{font-size:12px;font-weight:700;color:var(--hull);margin:10px 0 4px}
+.cmpi{display:grid;grid-template-columns:72px 1fr;gap:8px;padding:6px;border-radius:6px;cursor:pointer;border:2px solid transparent}
+.cmpi.on{border-color:var(--signal);background:#FFF8E1}
+.cmpi img{width:72px;height:54px;object-fit:cover;border-radius:4px;background:var(--deck)}
+.cmpi .r{font-size:11px}
+.rk{display:inline-block;font-size:10px;font-weight:700;border-radius:3px;padding:0 5px;color:#fff;background:var(--sea)}
+.rk.r2{background:#6A4C93}.rk.r3{background:#2E7D32}.rk.r4{background:#7A5A00}.rk.r5{background:var(--steel)}.rk.r9{background:#9AA5AE}
+
+/* 検索結果 */
+.sres{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+.sr{display:grid;grid-template-columns:80px 1fr;gap:8px;text-align:left;padding:6px;white-space:normal;align-items:start}
+.sr img{width:80px;height:60px;object-fit:cover;border-radius:4px;background:var(--deck)}
+.sr small{display:block;color:var(--steel);font-size:11px}
+.eqtable{width:100%;border-collapse:collapse;font-size:13px}
+.eqtable th,.eqtable td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.eqtable th{font-size:11px;color:var(--steel);font-weight:400;position:sticky;top:0;background:var(--paper)}
+
+/* レポート */
+#rp{position:fixed;top:0;left:0;right:0;bottom:0;height:100vh;height:100dvh;-webkit-overflow-scrolling:touch;z-index:88;background:#5E6B75;overflow:auto}
+.rpbar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:var(--hull);color:#fff}
+.rpbar b{flex:1}
+.rpbar button{background:transparent;color:#fff;border-color:#3B5673}
+.rpbar .primary{background:var(--signal);color:var(--ink);border-color:var(--signal);font-weight:700}
+.rp-doc{box-sizing:border-box;background:#fff;color:#111;width:min(210mm,100%);overflow-wrap:anywhere;margin:16px auto;padding:14mm 12mm;font-size:10pt;line-height:1.5}
+.rp-cover{min-height:250mm;display:flex;flex-direction:column;justify-content:center;border-bottom:1px dashed #ccc;margin-bottom:10mm}
+.rp-cover .kicker{letter-spacing:.2em;font-size:11pt;color:#16324F;font-weight:700}
+.rp-cover h1{font-size:30pt;margin:4mm 0 2mm;color:#16324F;letter-spacing:.02em}
+.rp-cover .sub{font-size:13pt;margin-bottom:10mm}
+.rp-cover table{width:100%;max-width:130mm}
+.rp-rule{height:3px;background:#16324F;margin:6mm 0;width:40mm}
+.rp-doc h2{font-size:14pt;color:#16324F;border-bottom:2px solid #16324F;padding-bottom:1mm;margin:8mm 0 4mm;break-after:avoid}
+.rp-doc h3{font-size:11pt;margin:5mm 0 2mm;background:#E9EDF0;padding:1mm 2mm;break-after:avoid}
+.rp-doc h4{font-size:10pt;margin:3mm 0 2mm;color:#16324F;break-after:avoid}
+.rp-t{width:100%;border-collapse:collapse;margin-bottom:4mm}
+.rp-t th,.rp-t td{border:1px solid #9AA5AE;padding:1.2mm 2mm;text-align:left;vertical-align:top}
+.rp-t th{background:#F4F6F8;width:35%;font-weight:700}
+.rp-t.list th{width:auto}
+.rp-text{white-space:pre-wrap;margin:0 0 3mm}
+.rp-grid{display:grid;gap:4mm;margin-bottom:4mm}
+.rp-grid.c2{grid-template-columns:1fr 1fr}
+.rp-grid.c3{grid-template-columns:1fr 1fr 1fr}
+.rp-card{border:1px solid #9AA5AE;break-inside:avoid;page-break-inside:avoid}
+.rp-card .img{aspect-ratio:4/3;background:#F4F6F8;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rp-card img{max-width:100%;max-height:100%;display:block}
+.rp-card .cap{padding:1.5mm 2mm;font-size:8.5pt}
+.rp-card .no{font-weight:700;color:#16324F;display:flex;gap:2mm;align-items:center}
+.rp-card .no i{font-style:normal;background:#B8401F;color:#fff;border-radius:2px;padding:0 1.5mm;font-size:7.5pt}
+.rp-card .ba{display:grid;grid-template-columns:1fr 1fr}
+.rp-card .ba .lbl{font-size:7.5pt;font-weight:700;text-align:center;background:#16324F;color:#fff}
+.rp-muted{color:#5E6B75}
+.rp-foot{margin-top:8mm;font-size:8pt;color:#5E6B75;border-top:1px solid #ccc;padding-top:2mm}
+
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{height:auto;overflow:visible;background:#fff;display:block}
+  body>*:not(#rp){display:none!important}
+  #rp{position:static;overflow:visible;background:#fff}
+  .rpbar{display:none}
+  .rp-doc{width:auto;margin:0;padding:0;box-shadow:none}
+  .rp-cover{min-height:265mm;border:0;margin:0;break-after:page;page-break-after:always}
+  .rp-sec{break-before:page;page-break-before:always}
+  .rp-sec.cont{break-before:auto;page-break-before:auto}
+  .rp-grid.c3{grid-template-columns:1fr 1fr 1fr}
+  .rp-doc{padding:0}
+}
+
+@media (max-width:820px){
+  main{grid-template-columns:1fr}
+  .cmpbody{grid-template-columns:1fr;grid-template-rows:1fr 42%}
+  .cmppair{grid-template-columns:1fr 1fr}
+  #menu{left:16px;right:16px}
+  body.tab-tray #matrixPane,body.tab-matrix #trayPane{display:none}
+  #trayPane{border-left:0}
+  #tabs{display:flex;background:var(--paper);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  #tabs button{flex:1;border:0;border-radius:0;padding:12px;background:var(--paper)}
+  #tabs button.cur{box-shadow:inset 0 3px 0 var(--hull);font-weight:700;color:var(--hull)}
+  .top{padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));gap:6px}
+  .brand{font-size:14px}
+  .top select{flex:1;min-width:0;padding:6px 8px}
+  .top .actions{margin-left:0;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .top .actions>*{text-align:center;padding:8px 2px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  #menu{left:10px;right:10px;min-width:0}
+  .dlg footer{gap:6px}
+  .dlg footer button{padding:9px 10px}
+  .dlg footer .hint{flex-basis:100%}
+  .mtools .hint{display:none}
+  .lprow{flex-wrap:wrap}
+  .lprow input{flex:1 1 100%}
+  .lprow select{flex:1 1 100%}
+  .lplist{max-height:40vh;max-height:40dvh}
+  .pvstage{height:40vh;height:40dvh}
+  .tf input{width:100%}
+  .tf{flex:1 1 100%}
+  .rp-doc{padding:6mm 4mm;margin:0}
+  .rp-grid.c3{grid-template-columns:1fr 1fr}
+  .sres{grid-template-columns:1fr}
+  .vtable{font-size:12px}
+  .vtable th:nth-child(2),.vtable td:nth-child(2),.vtable th:nth-child(4),.vtable td:nth-child(4){display:none}
+  #matrixPane{padding:10px}
+  .mwrap{max-height:calc(100vh - 270px);max-height:calc(100dvh - 270px)}
+  .mx tbody th,.mx thead th.corner{min-width:104px;max-width:104px;font-size:11px;padding:2px 5px}
+  .bd{font-size:8px;width:12px;line-height:12px;margin-left:2px}
+  .cell{width:46px;height:36px}
+  .cell .cnt{font-size:9px;padding:0 4px;right:1px;bottom:1px}
+  .mx thead th{min-width:46px;max-width:46px;font-size:9.5px;padding:4px 1px;letter-spacing:-.01em}
+  .phead{margin:0 0 6px}
+  .phead h1{font-size:18px}
+  .pmeta{font-size:12px}
+  .pv,.asg,.grid2,.grid3{grid-template-columns:1fr}
+  .pvstage{height:44vh}
+  #modal{padding:0}
+  .dlg{height:100vh;height:100dvh;max-height:none;border-radius:0;width:100vw}
+  #modal{place-items:stretch}
+  .dlg header{padding-top:max(12px,env(safe-area-inset-top))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="tab-tray">
+<header class="top">
+  <div class="brand">Housen Photo</div>
+  <select id="visitSel" aria-label="訪船を選択"></select>
+  <div class="actions">
+    <button data-act="new">新規訪船</button>
+    <button data-act="visitInfo" id="btnVisit">訪船情報</button>
+    <label class="btn" id="fileLbl">取り込み<input type="file" id="fileIn" accept="image/*" multiple hidden></label>
+    <button data-act="report" id="btnReport">レポート</button>
+    <button data-act="menu" aria-haspopup="true" aria-expanded="false" id="btnMenu">メニュー ▾</button>
+    <button class="primary" data-act="shoot">撮影する</button>
+  </div>
+  <div id="menu" hidden role="menu">
+    <button role="menuitem" data-act="vessels">船マスタ</button>
+    <button role="menuitem" data-act="equip">Equipment 管理</button>
+    <button role="menuitem" data-act="search">検索・比較</button>
+    <button role="menuitem" data-act="backup">バックアップ（書き出し・読み込み）</button>
+  </div>
+</header>
+<div id="notice" class="notice" hidden></div>
+<main>
+  <section id="matrixPane" class="pane" aria-label="場所と項目の表"></section>
+  <aside id="trayPane" class="pane" aria-label="未振り分けの写真">
+    <div class="trayhead">
+      <h2>未振り分け <span id="unCount">0</span>枚</h2>
+      <div id="todoTray"></div>
+      <label class="gap"><span style="white-space:nowrap">区切り</span><input type="range" id="gapIn" min="1" max="30" value="3" aria-label="グループを区切る撮影間隔（分）"><span style="white-space:nowrap"><b id="gapVal">3</b>分以上の間隔</span></label>
+    </div>
+    <div id="tray"></div>
+    <div id="selbar" hidden><span><span id="selN">0</span>枚選択中</span><span class="sp"></span><button data-act="clearSel">解除</button><button class="primary" data-act="assign">振り分け</button></div>
+  </aside>
+</main>
+<nav id="tabs">
+  <button data-act="tab" data-tab="tray" id="tabTray">未振り分け</button>
+  <button data-act="tab" data-tab="matrix" id="tabMatrix">場所×項目</button>
+</nav>
+
+<div id="cam" hidden>
+  <div class="camstage">
+    <video id="camVideo" playsinline muted autoplay></video>
+    <img id="camShot" alt="撮影した写真" hidden>
+    <div class="camfb" id="camFb" hidden><p style="margin:0 0 8px">この画面ではアプリ内カメラが使えないため、iPhone標準のカメラで撮影します。<br>（標準カメラは1枚ごとに「写真を使用」の確認が出ます）</p><p class="hint" id="camErr" style="color:#9FB0BF;margin:0 0 12px"></p><button data-c="retry" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.4)">アプリ内カメラを再試行</button></div>
+    <div class="flash" id="camFlash"></div>
+  </div>
+  <div class="camtop" id="camTop">
+    <button data-c="exit">終了</button>
+    <button id="camLocBtn" data-c="loc">場所：未指定</button>
+    <button id="camBurst" data-c="burst" aria-pressed="false">連続 OFF</button>
+  </div>
+  <div class="cambar" id="camBar">
+    <div class="camlast"><img id="camLast" alt="" hidden><span id="camN">0枚</span></div>
+    <div class="shotwrap"><button class="shutter" data-c="shot" aria-label="撮影"></button><div id="camMode"></div></div>
+    <span class="camlast" id="camPend"></span>
+  </div>
+  <div class="camsheet" id="camSheet" hidden>
+    <div class="csloc">場所：<b id="csLoc"></b><button data-c="loc">変更</button></div>
+    <div class="ichips" id="csItems"></div>
+    <textarea id="camCom" rows="2" placeholder="コメント"></textarea>
+    <label class="chk"><input type="checkbox" id="csMajor">Major Finding</label>
+    <div class="chips" id="camChips"></div>
+    <div class="camrow"><button class="primary big" data-c="save">保存して次を撮る</button></div>
+    <div class="camrow"><button data-c="savenc">コメントなしで次を撮る</button><button data-c="saveexit">保存して終了</button></div>
+    <div class="camrow sm"><button data-c="retake">撮り直す</button><button class="danger" data-c="discard">削除</button><button data-c="pen" id="csPen">ペンで書き込む</button></div>
+  </div>
+  <div class="camlp" id="camLp" hidden>
+    <div class="camlphead"><b>場所を選択</b><button data-c="lpnone">未指定</button><button data-c="lpclose">閉じる</button></div>
+    <div id="camLpBox"></div>
+  </div>
+  <input type="file" id="capIn" accept="image/*" capture="environment" hidden>
+</div>
+
+<div id="pe" hidden></div>
+<div id="cmp" hidden></div>
+<div id="rp" hidden></div>
+<div id="modal" hidden></div>
+<div id="progress" hidden><div class="pbox"><p id="pText">処理中</p><div class="bar"><i id="pBar"></i></div></div></div>
+<div id="dropHint" hidden>ここに写真をドロップして取り込み</div>
+<div id="toast" role="status"></div>
+<script>
+'use strict';
+/* ================= 保存層 =================
+   端末内(IndexedDB)。SharePoint同期はこの Store の上に同期キューを載せて実装する予定。 */
+const Store = (() => {
+  let db = null;
+  const mem = { vessels: new Map(), visits: new Map(), photos: new Map(), blobs: new Map(), equipment: new Map() };
+  async function init() {
+    try {
+      db = await new Promise((res, rej) => {
+        const r = indexedDB.open('housen-photo', 2);
+        r.onupgradeneeded = () => {
+          const d = r.result, has = n => d.objectStoreNames.contains(n);
+          if (!has('vessels')) d.createObjectStore('vessels', { keyPath: 'id' });
+          if (!has('visits')) d.createObjectStore('visits', { keyPath: 'id' });
+          if (!has('photos')) d.createObjectStore('photos', { keyPath: 'id' }).createIndex('visitId', 'visitId');
+          if (!has('blobs')) d.createObjectStore('blobs');
+          if (!has('equipment')) d.createObjectStore('equipment', { keyPath: 'id' }).createIndex('vesselId', 'vesselId');
+        };
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+      return true;
+    } catch (e) { db = null; return false; }
+  }
+  function tx(name, mode, fn) {
+    return new Promise((res, rej) => {
+      const t = db.transaction(name, mode);
+      const req = fn(t.objectStore(name));
+      let out;
+      if (req) req.onsuccess = () => { out = req.result; };
+      t.oncomplete = () => res(out);
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error);
+    });
+  }
+  const all = n => db ? tx(n, 'readonly', s => s.getAll()) : Promise.resolve([...mem[n].values()]);
+  const put = (n, o) => db ? tx(n, 'readwrite', s => s.put(o)) : (mem[n].set(o.id, o), Promise.resolve());
+  const del = (n, id) => db ? tx(n, 'readwrite', s => s.delete(id)) : (mem[n].delete(id), Promise.resolve());
+  const api = {
+    init,
+    listVessels: () => all('vessels'), putVessel: v => put('vessels', v), deleteVessel: id => del('vessels', id),
+    listVisits: () => all('visits'), putVisit: v => put('visits', v),
+    listPhotos: vid => db ? tx('photos', 'readonly', s => s.index('visitId').getAll(vid)) : Promise.resolve([...mem.photos.values()].filter(x => x.visitId === vid)),
+    putPhoto: p => put('photos', p),
+    allPhotos: () => all('photos'),
+    getPhoto: id => db ? tx('photos', 'readonly', s => s.get(id)) : Promise.resolve(mem.photos.get(id)),
+    listEquip: vid => db ? tx('equipment', 'readonly', s => s.index('vesselId').getAll(vid)) : Promise.resolve([...mem.equipment.values()].filter(x => x.vesselId === vid)),
+    allEquip: () => all('equipment'),
+    putEquip: e => put('equipment', e),
+    deleteEquip: id => del('equipment', id),
+    async deletePhoto(id) {
+      await del('photos', id);
+      for (const k of ['o', 'f', 't']) await api.delBlob(id + ':' + k);
+    },
+    putBlob: (k, b) => db ? tx('blobs', 'readwrite', s => s.put(b, k)) : (mem.blobs.set(k, b), Promise.resolve()),
+    getBlob: k => db ? tx('blobs', 'readonly', s => s.get(k)) : Promise.resolve(mem.blobs.get(k)),
+    delBlob: k => db ? tx('blobs', 'readwrite', s => s.delete(k)) : (mem.blobs.delete(k), Promise.resolve()),
+    async deleteVisit(id) {
+      for (const ph of await api.listPhotos(id)) await api.deletePhoto(ph.id);
+      await del('visits', id);
+    }
+  };
+  return api;
+})();
+
+/* ================= 共通 ================= */
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const pad3 = n => String(n).padStart(3, '0');
+const fmtTime = ts => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDT = ts => { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${fmtTime(ts)}`; };
+const fmtFull = ts => { const d = new Date(ts); return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const isMobile = () => matchMedia('(max-width:820px)').matches;
+const clone = o => JSON.parse(JSON.stringify(o));
+const slug = s => s.replace(/₂/g, '2').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const range = n => Array.from({ length: Math.max(0, n | 0) }, (_, i) => i + 1);
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
+
+/* ================= マスタ定義 ================= */
+const CATS = [
+  { id: 'NAV', name: 'NAVIGATION' }, { id: 'ACC', name: 'ACCOMMODATION' }, { id: 'FCL', name: 'FORECASTLE' },
+  { id: 'DK', name: 'CARGO / DECK' }, { id: 'AFT', name: 'AFT STATION' }, { id: 'ECR', name: 'ECR' },
+  { id: 'ER', name: 'ENGINE ROOM' }, { id: 'EMG', name: 'EMERGENCY EQUIPMENT' }, { id: 'TK', name: 'TANKS' },
+  { id: 'ENC', name: 'ENCLOSED SPACES' }
+];
+const catName = id => CATS.find(c => c.id === id)?.name || id;
+const FIXED = {
+  NAV: ['Bridge', 'Bridge Wing (P)', 'Bridge Wing (S)', 'Chart Room', 'Radio / GMDSS Room', 'Monkey Island', 'Compass Deck'],
+  ACC: ['Captain Cabin', 'Chief Engineer Cabin', 'Officer Cabins', 'Crew Cabins', 'Mess Room', 'Galley', 'Provision Store', 'Dry Store',
+    'Cold Room', 'Freezer Room', 'Laundry', 'Hospital', 'Recreation Room', 'A/C Room', 'Public Area'],
+  FCL: ['Forecastle Deck', 'Mooring Station FWD', 'Windlass Area', 'Anchor Area', 'Chain Locker', 'Bosun Store', 'Paint Store'],
+  DK: ['Main Deck', 'Hatch Cover', 'Hatch Coaming', 'Accommodation Ladder', 'Pilot Ladder Area', 'Bunker Manifold', 'Fire Line'],
+  AFT: ['Poop Deck', 'Mooring Station AFT'],
+  ECR: ['ECR', 'ECR Documentation', 'Alarm Monitoring System'],
+  ER: ['E/R Upper Floor', 'E/R 3rd Floor', 'E/R 2nd Floor', 'E/R Lower Floor', 'Tank Top', 'Main Engine', 'Turbocharger Area', 'Boiler Area',
+    'Economizer Area', 'Purifier Room', 'Air Compressor Area', 'Refrigeration Plant', 'Fresh Water Generator', 'BWTS Area', 'OWS Area',
+    'Incinerator Area', 'Sewage Treatment Plant', 'Workshop', 'Spare Parts Store', 'Engine Store', 'Bilge Well (P)', 'Bilge Well (S)'],
+  EMG: ['Steering Gear Room', 'Emergency Generator Room', 'Emergency Fire Pump Room', 'CO₂ Room', 'Fire Control Station', 'Battery Room', 'Emergency Escape Trunk'],
+  TK: ['FO Storage Tank', 'DO Storage Tank', 'Settling Tank', 'Service Tank', 'LO Storage Tank', 'LO Service Tank', 'Fresh Water Tank',
+    'Drinking Water Tank', 'Sewage Holding Tank', 'Grey Water Holding Tank', 'Clean Bilge Tank', 'Sludge Tank', 'Waste Oil Tank'],
+  // FPT/APT/DB/Chain Locker/Cargo Hold/CO₂ Room/Battery Room は他カテゴリで登録済みのため、属性(Enclosed)で管理し重複登録しない
+  ENC: ['Wing Tank', 'Deep Tank', 'Cofferdam', 'Void Space', 'Shaft Tunnel', 'Pipe Tunnel']
+};
+/* 属性の初期値（E: Enclosed Space / D: Dangerous Atmosphere / P: Permit Required） */
+const ATTR_ENC = new Set(['Chain Locker', 'CO₂ Room', 'Battery Room', ...FIXED.ENC]);
+const ATTR_DAN = new Set(['CO₂ Room', 'Battery Room', 'Paint Store', 'FO Storage Tank', 'DO Storage Tank', 'Settling Tank', 'Service Tank',
+  'Sewage Holding Tank', 'Grey Water Holding Tank', 'Sludge Tank', 'Waste Oil Tank', 'Cofferdam', 'Void Space']);
+const ALIASES = {
+  'Bridge': ['br', 'wheelhouse', '船橋', 'ブリッジ'], 'Monkey Island': ['mi'], 'Radio / GMDSS Room': ['gmdss', 'radio'], 'Compass Deck': ['cd'],
+  'Galley': ['調理室'], 'Mess Room': ['食堂'], 'A/C Room': ['ac', 'aircon', '空調'], 'Hospital': ['病室'],
+  'Forecastle Deck': ['fcle', 'fc', '船首楼'], 'Windlass Area': ['wl', 'windlass', '揚錨機'], 'Chain Locker': ['cl', 'チェーンロッカー'],
+  'Bosun Store': ['bs', 'bosun'], 'Paint Store': ['ps', 'paint', 'ペイント'],
+  'Main Deck': ['md', 'upper', '上甲板'], 'Hatch Cover': ['hc', 'ハッチカバー'], 'Hatch Coaming': ['hcm'], 'Accommodation Ladder': ['al', '舷梯'],
+  'Pilot Ladder Area': ['pl', 'pilot'], 'Bunker Manifold': ['bm', 'bunker'], 'Fire Line': ['fl'],
+  'Poop Deck': ['poop', 'pd'], 'ECR': ['機関制御室'], 'Alarm Monitoring System': ['ams', 'alarm'],
+  'Main Engine': ['me', 'm/e', '主機'], 'Turbocharger Area': ['tc', 't/c', '過給機'], 'Boiler Area': ['blr', 'ボイラ'], 'Economizer Area': ['eco'],
+  'Purifier Room': ['pur', '清浄機'], 'Air Compressor Area': ['comp', '空気圧縮機'], 'Refrigeration Plant': ['ref', '冷凍機'],
+  'Fresh Water Generator': ['fwg', '造水機'], 'BWTS Area': ['bwts', 'bwms'], 'OWS Area': ['ows', '油水分離器'], 'Incinerator Area': ['inc', '焼却炉'],
+  'Sewage Treatment Plant': ['stp', '汚水処理'], 'Workshop': ['ws', '工作室'], 'Tank Top': ['tt'],
+  'E/R Upper Floor': ['uf', 'erup'], 'E/R 3rd Floor': ['3f', 'er3'], 'E/R 2nd Floor': ['2f', 'er2'], 'E/R Lower Floor': ['lf', 'erlow', 'floor'],
+  'Steering Gear Room': ['sg', 's/g', '操舵機'], 'Emergency Generator Room': ['edg', 'egr', '非常発電機'], 'Emergency Fire Pump Room': ['efp', '非常消火ポンプ'],
+  'CO₂ Room': ['co2'], 'Fire Control Station': ['fcs'], 'Battery Room': ['bat', 'バッテリー'], 'Emergency Escape Trunk': ['eet', 'escape'],
+  'FO Storage Tank': ['fost'], 'DO Storage Tank': ['dost'], 'Sludge Tank': ['sludge'], 'Sewage Holding Tank': ['sht'], 'Shaft Tunnel': ['st'], 'Pipe Tunnel': ['pt']
+};
+const ITEMS = [
+  ['general-condition', 'General Condition', 'General', '全般状態'],
+  ['corrosion-rust', 'Corrosion / Rust', 'Corrosion', '腐食・錆'],
+  ['coating-paint', 'Coating / Paint', 'Paint', '塗装'],
+  ['leakage-seepage', 'Leakage / Seepage', 'Leak', '漏洩・滲み'],
+  ['damage-deformation', 'Damage / Deformation', 'Damage', '損傷・変形'],
+  ['cleanliness-housekeeping', 'Cleanliness / Housekeeping', 'Clean', '清掃・整理整頓'],
+  ['documentation-record', 'Documentation / Record', 'Document', '書類・記録'],
+  ['good-practice', 'Good Practice', 'Good', 'グッドプラクティス'],
+  ['other', 'Other', 'Other', 'その他']
+].map(([id, en, short, ja]) => ({ id, en, short, ja }));
+const ITEM_IDS = new Set(ITEMS.map(i => i.id));
+/* 大カテゴリのタブ（場所のカテゴリ・写真番号の区画コードはそのまま） */
+const CAT_TABS = [
+  { id: 'ALL', label: 'ALL', cats: null },
+  { id: 'NAV', label: 'NAV', cats: ['NAV'] },
+  { id: 'ACC', label: 'ACCOM', cats: ['ACC'] },
+  { id: 'FCL', label: 'FORECASTLE', cats: ['FCL'] },
+  { id: 'DK', label: 'CARGO', cats: ['DK', 'AFT'] },
+  { id: 'ER', label: 'E/R', cats: ['ECR', 'ER'] },
+  { id: 'TK', label: 'TANK', cats: ['TK', 'ENC'] },
+  { id: 'EMG', label: 'EMG', cats: ['EMG'] }
+];
+const tabOfCat = cat => CAT_TABS.find(t => t.cats && t.cats.includes(cat))?.id || 'ALL';
+const itemName = id => ITEMS.find(i => i.id === id)?.short || id;
+
+const newVessel = name => ({
+  id: uid(), name, imo: '', flag: '', cls: '', holds: 5, cranes: 3, gens: 3,
+  tanks: defaultTanks(), updatedAt: Date.now()
+});
+/* タンク構成：Hold数とは独立して No. と P/S 区分を指定 */
+const TANK_TYPES = [
+  { key: 'db', label: 'DB Tank', pre: 'DB', al: ['db', 'double bottom '] },
+  { key: 'tst', label: 'Top Side Tank', pre: 'TST', al: ['tst', 'ts', 'topside '] },
+  { key: 'bt', label: 'Ballast Tank', pre: 'BT', al: ['bt', 'wbt', 'ballast '] }
+];
+const SIDES = { ps: ['P', 'S'], pcs: ['P', 'C', 'S'], none: [''] };
+function defaultTanks() {
+  return { fpt: true, apt: true, db: { on: true, nos: '1-3', side: 'ps' }, tst: { on: true, nos: '1-5', side: 'ps' }, bt: { on: false, nos: '', side: 'ps' } };
+}
+function parseNos(str) {
+  const out = new Set();
+  for (const part of String(str || '').split(/[,、\s]+/)) {
+    const m = part.match(/^(\d+)(?:[-~〜](\d+))?$/);
+    if (!m) continue;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    for (let i = Math.min(a, b); i <= Math.max(a, b) && i <= 99; i++) if (i > 0) out.add(i);
+  }
+  return [...out].sort((x, y) => x - y);
+}
+function normalizeVessel(v) {
+  const t = v.tanks || {};
+  if (Array.isArray(t.dbHolds) || Array.isArray(t.tstHolds) || !t.bt) {
+    const toNos = arr => (arr || []).join(',');
+    v.tanks = {
+      fpt: t.fpt ?? true, apt: t.apt ?? true,
+      db: typeof t.db === 'object' ? t.db : { on: !!t.db, nos: toNos(t.dbHolds), side: 'ps' },
+      tst: typeof t.tst === 'object' ? t.tst : { on: !!t.tst, nos: toNos(t.tstHolds), side: 'ps' },
+      bt: t.bt || { on: false, nos: '', side: 'ps' }
+    };
+    return true;
+  }
+  return false;
+}
+
+function buildLocations(v) {
+  const L = [];
+  const add = (cat, name, o = {}) => {
+    const enc = o.enc ?? ATTR_ENC.has(name);
+    L.push({ id: 'L-' + slug(name), cat, name, aliases: o.aliases || ALIASES[name] || [], enc, dan: o.dan ?? ATTR_DAN.has(name), per: enc });
+  };
+  const fixed = cat => FIXED[cat].forEach(n => add(cat, n));
+  fixed('NAV'); fixed('ACC'); fixed('FCL');
+  fixed('DK');
+  range(v.holds).forEach(i => add('DK', `Cargo Hold No.${i}`, { aliases: [`h${i}`, `ch${i}`, `hold${i}`, `${i}番艙`], enc: true }));
+  range(v.holds).forEach(i => add('DK', `Cargo Hold Bilge Well No.${i}`, { aliases: [`bw${i}`, `hbw${i}`] }));
+  range(v.cranes).forEach(i => add('DK', `Deck Crane No.${i}`, { aliases: [`cr${i}`, `dc${i}`, `crane${i}`, `${i}番クレーン`] }));
+  fixed('AFT'); fixed('ECR');
+  fixed('ER');
+  range(v.gens).forEach(i => add('ER', `Generator No.${i}`, { aliases: [`dg${i}`, `ge${i}`, `gen${i}`, `g/e${i}`, `${i}号発電機`] }));
+  fixed('EMG');
+  const t = v.tanks || {};
+  if (t.fpt) add('TK', 'FPT', { aliases: ['fpt', 'forepeak', 'fore peak tank'], enc: true });
+  if (t.apt) add('TK', 'APT', { aliases: ['apt', 'afterpeak', 'after peak tank'], enc: true });
+  for (const tt of TANK_TYPES) {
+    const c = t[tt.key];
+    if (!c || !c.on) continue;
+    for (const i of parseNos(c.nos)) for (const sd of SIDES[c.side] || SIDES.ps) {
+      const name = `${tt.pre} No.${i}${sd ? ' ' + sd : ''}`;
+      add('TK', name, { aliases: tt.al.map(a => `${a}${i}${sd.toLowerCase()}`), enc: true });
+    }
+  }
+  FIXED.TK.forEach(n => add('TK', n, { enc: true }));
+  fixed('ENC');
+  return L;
+}
+
+/* 検索：dg2 → Generator No.2 など */
+const norm = s => String(s).toLowerCase().replace(/₂/g, '2').replace(/no\./g, '').replace(/[\s.\/\-()（）・_]/g, '');
+function searchLocs(locs, q) {
+  const n = norm(q);
+  if (!n) return locs;
+  const out = [];
+  locs.forEach((l, idx) => {
+    const nn = norm(l.name);
+    let sc = 0;
+    for (const a of l.aliases) { const na = norm(a); if (na === n) sc = Math.max(sc, 100); else if (na.startsWith(n)) sc = Math.max(sc, 80); }
+    if (nn === n) sc = Math.max(sc, 95);
+    else if (nn.startsWith(n)) sc = Math.max(sc, 70);
+    else if (nn.includes(n)) sc = Math.max(sc, 50);
+    else {
+      const ini = l.name.split(/[\s/]+/).map(w => w[0] || '').join('').toLowerCase().replace(/[^a-z]/g, '') + (l.name.match(/\d+/)?.[0] || '');
+      if (ini.startsWith(n)) sc = Math.max(sc, 40);
+    }
+    if (sc) out.push([sc, idx, l]);
+  });
+  return out.sort((a, b) => b[0] - a[0] || a[1] - b[1]).map(x => x[2]);
+}
+const attrBadges = l => `${l.enc ? '<i class="bd enc" title="Enclosed Space">E</i>' : ''}${l.dan ? '<i class="bd dan" title="Dangerous Atmosphere">D</i>' : ''}${l.per ? '<i class="bd per" title="Permit Required">P</i>' : ''}`;
+
+/* ================= 状態 ================= */
+const S = {
+  vessels: [], visits: [], visit: null, vessel: null, locs: [], locMap: new Map(), photos: [], equip: [],
+  selected: new Set(), gapMin: 3, tab: 'tray', catTab: 'ALL', onlyFilled: true, cellMap: new Map(), groups: [], onClose: null
+};
+const COLORS = [['#E53935', '赤'], ['#F0B400', '黄'], ['#FFFFFF', '白'], ['#1E88E5', '青'], ['#111111', '黒']];
+const newEdit = () => ({ rot: 0, crop: null, bright: 1, shapes: [] });
+const isAssigned = p => !!(p.loc && S.locMap.has(p.loc));
+const needsComment = p => !(p.comment || '').trim();
+const needsInput = p => !isAssigned(p) || needsComment(p);
+const flagTags = p => `${!isAssigned(p) ? '<span class="tag fl">未分類</span>' : ''}${needsComment(p) ? '<span class="tag fl">未コメント</span>' : ''}`;
+
+/* ---- 画像URLキャッシュ ---- */
+const thumbCache = new Map(), fullCache = new Map();
+async function blobURL(cache, key, limit) {
+  if (cache.has(key)) return cache.get(key);
+  const b = await Store.getBlob(key);
+  const u = b ? URL.createObjectURL(b) : '';
+  cache.set(key, u);
+  if (limit && cache.size > limit) { const [k, v] = cache.entries().next().value; if (v) URL.revokeObjectURL(v); cache.delete(k); }
+  return u;
+}
+const thumbURL = id => blobURL(thumbCache, id + ':t');
+const fullURL = id => blobURL(fullCache, id + ':f', 6);
+function dropCache(id) {
+  for (const [c, k] of [[thumbCache, id + ':t'], [fullCache, id + ':f']]) if (c.has(k)) { const u = c.get(k); if (u) URL.revokeObjectURL(u); c.delete(k); }
+}
+function clearCaches() { for (const c of [thumbCache, fullCache]) { for (const u of c.values()) u && URL.revokeObjectURL(u); c.clear(); } }
+function hydrate(root) { root.querySelectorAll('img[data-thumb]').forEach(async im => { im.src = await thumbURL(im.dataset.thumb); }); }
+
+/* ================= 画像処理 ================= */
+async function readExifDate(file) {
+  try {
+    const v = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
+    if (v.getUint16(0) !== 0xFFD8) return null;
+    let off = 2;
+    while (off + 10 < v.byteLength) {
+      const marker = v.getUint16(off);
+      if ((marker & 0xFF00) !== 0xFF00 || marker === 0xFFDA) return null;
+      const len = v.getUint16(off + 2);
+      if (marker === 0xFFE1 && v.getUint32(off + 4) === 0x45786966) return parseTiffDate(v, off + 10);
+      off += 2 + len;
+    }
+  } catch (e) { /* ファイル日時で代用 */ }
+  return null;
+}
+function parseTiffDate(v, t) {
+  const le = v.getUint16(t) === 0x4949;
+  const u16 = o => v.getUint16(o, le), u32 = o => v.getUint32(o, le);
+  const ifd = o => { const out = {}; const n = u16(t + o); for (let i = 0; i < n; i++) { const e = t + o + 2 + i * 12; out[u16(e)] = e; } return out; };
+  const ascii = e => { const n = u32(e + 4); const p = n > 4 ? t + u32(e + 8) : e + 8; let s = ''; for (let i = 0; i < n - 1; i++) s += String.fromCharCode(v.getUint8(p + i)); return s; };
+  const i0 = ifd(u32(t + 4));
+  let str = null;
+  if (i0[0x8769]) { const ex = ifd(u32(i0[0x8769] + 8)); if (ex[0x9003]) str = ascii(ex[0x9003]); }
+  if (!str && i0[0x0132]) str = ascii(i0[0x0132]);
+  const m = str && str.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]).getTime() : null;
+}
+async function decode(blob) {
+  try { return await createImageBitmap(blob, { imageOrientation: 'from-image' }); }
+  catch (e) { return loadImg(URL.createObjectURL(blob)); }
+}
+function loadImg(url) {
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+}
+const dimsOf = src => [src.naturalWidth || src.width, src.naturalHeight || src.height];
+function shrinkCanvas(src, max) {
+  const [w, h] = dimsOf(src);
+  const k = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+const canvasBlob = (c, q = 0.85) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('encode')), 'image/jpeg', q));
+
+function drawRotated(ctx, img, rot, W, H) {
+  ctx.save();
+  if (rot === 90) { ctx.translate(H, 0); ctx.rotate(Math.PI / 2); }
+  else if (rot === 180) { ctx.translate(W, H); ctx.rotate(Math.PI); }
+  else if (rot === 270) { ctx.translate(0, W); ctx.rotate(-Math.PI / 2); }
+  ctx.drawImage(img, 0, 0, W, H);
+  ctx.restore();
+}
+function arrowHead(ctx, x1, y1, x2, y2, size) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - size * Math.cos(a - 0.42), y2 - size * Math.sin(a - 0.42));
+  ctx.lineTo(x2 - size * Math.cos(a + 0.42), y2 - size * Math.sin(a + 0.42));
+  ctx.closePath(); ctx.fill();
+}
+const outline = c => (c === '#FFFFFF' || c === '#F0B400') ? '#000000' : '#FFFFFF';
+function drawShape(ctx, sh, rw, rh) {
+  const M = Math.max(rw, rh), P = p => [p[0] * rw, p[1] * rh], lw = Math.max(1, sh.w * M);
+  ctx.save();
+  ctx.strokeStyle = sh.c; ctx.fillStyle = sh.c; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const line = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); };
+  switch (sh.t) {
+    case 'pen': {
+      ctx.beginPath();
+      sh.pts.forEach((p, i) => { const [x, y] = P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      if (sh.pts.length === 1) { const [x, y] = P(sh.pts[0]); ctx.lineTo(x + 0.1, y); }
+      ctx.stroke(); break;
+    }
+    case 'arrow': { const [x1, y1] = P(sh.a), [x2, y2] = P(sh.b); line(x1, y1, x2, y2); arrowHead(ctx, x1, y1, x2, y2, lw * 4.5); break; }
+    case 'rect': { const [x1, y1] = P(sh.a), [x2, y2] = P(sh.b); ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)); break; }
+    case 'circle': {
+      const [x1, y1] = P(sh.a), [x2, y2] = P(sh.b);
+      ctx.beginPath(); ctx.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.max(0.5, Math.abs(x2 - x1) / 2), Math.max(0.5, Math.abs(y2 - y1) / 2), 0, 0, Math.PI * 2); ctx.stroke(); break;
+    }
+    case 'text': {
+      const [x, y] = P(sh.a), fs = sh.size * M;
+      ctx.font = `700 ${fs}px "BIZ UDPGothic","Hiragino Sans",sans-serif`; ctx.textBaseline = 'top';
+      ctx.lineWidth = fs * 0.2; ctx.strokeStyle = outline(sh.c);
+      ctx.strokeText(sh.text, x, y); ctx.fillText(sh.text, x, y); break;
+    }
+    case 'dim': {
+      const [x1, y1] = P(sh.a), [x2, y2] = P(sh.b);
+      const a = Math.atan2(y2 - y1, x2 - x1), nx = -Math.sin(a), ny = Math.cos(a), tk = lw * 5;
+      line(x1, y1, x2, y2);
+      line(x1 - nx * tk, y1 - ny * tk, x1 + nx * tk, y1 + ny * tk);
+      line(x2 - nx * tk, y2 - ny * tk, x2 + nx * tk, y2 + ny * tk);
+      arrowHead(ctx, x1, y1, x2, y2, lw * 4); arrowHead(ctx, x2, y2, x1, y1, lw * 4);
+      if (sh.text) {
+        const fs = 0.03 * M, mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+        ctx.font = `700 ${fs}px "BIZ UDPGothic","Hiragino Sans",sans-serif`;
+        const tw = ctx.measureText(sh.text).width, padd = fs * 0.3;
+        ctx.fillStyle = 'rgba(255,255,255,.92)';
+        ctx.fillRect(mx - tw / 2 - padd, my - fs / 2 - padd, tw + padd * 2, fs + padd * 2);
+        ctx.lineWidth = Math.max(1, lw / 2); ctx.strokeRect(mx - tw / 2 - padd, my - fs / 2 - padd, tw + padd * 2, fs + padd * 2);
+        ctx.fillStyle = sh.c === '#FFFFFF' ? '#111111' : sh.c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(sh.text, mx, my);
+      }
+      break;
+    }
+  }
+  ctx.restore();
+}
+function pixelBright(c, b) {
+  const ctx = c.getContext('2d'), d = ctx.getImageData(0, 0, c.width, c.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) { a[i] = Math.min(255, a[i] * b); a[i + 1] = Math.min(255, a[i + 1] * b); a[i + 2] = Math.min(255, a[i + 2] * b); }
+  ctx.putImageData(d, 0, 0);
+}
+/* 編集内容（回転・トリミング・明るさ・書き込み）を適用した画像を作る。元画像は変更しない */
+function renderEdited(img, edit, maxW, maxH = maxW) {
+  edit = edit || newEdit();
+  const [W, H] = dimsOf(img), rot = edit.rot || 0;
+  const [rw, rh] = rot % 180 ? [H, W] : [W, H];
+  const R = edit.crop || { x: 0, y: 0, w: 1, h: 1 };
+  const sw = R.w * rw, sh = R.h * rh, k = Math.min(1, maxW / sw, maxH / sh);
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(sw * k)); c.height = Math.max(1, Math.round(sh * k));
+  const ctx = c.getContext('2d');
+  const b = edit.bright ?? 1, canFilter = typeof ctx.filter === 'string';
+  ctx.setTransform(k, 0, 0, k, -R.x * rw * k, -R.y * rh * k);
+  if (b !== 1 && canFilter) ctx.filter = `brightness(${b})`;
+  drawRotated(ctx, img, rot, W, H);
+  if (canFilter) ctx.filter = 'none';
+  if (b !== 1 && !canFilter) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); pixelBright(c, b); ctx.restore(); }
+  for (const s of edit.shapes || []) drawShape(ctx, s, rw, rh);
+  return c;
+}
+
+/* 写真の保存：元写真(o)・作業用2000px(f)・編集反映サムネイル(t) */
+async function storePhoto(visitId, src, meta) {
+  const bmp = await decode(src);
+  const work = shrinkCanvas(bmp, 2000);
+  bmp.close?.();
+  const id = uid();
+  await Store.putBlob(id + ':o', src);
+  await Store.putBlob(id + ':f', await canvasBlob(work));
+  await Store.putBlob(id + ':t', await canvasBlob(renderEdited(work, meta.edit, 360), 0.72));
+  const ph = {
+    id, visitId, name: meta.name, takenAt: meta.takenAt, loc: meta.loc || null, items: meta.items || [],
+    comment: meta.comment || '', commentEn: '', edit: meta.edit || newEdit(), include: true, major: !!meta.major, equipId: null, links: [], addedAt: Date.now()
+  };
+  await Store.putPhoto(ph);
+  if (S.visit && S.visit.id === visitId) S.photos.push(ph);
+  return ph;
+}
+async function refreshThumb(ph, img) {
+  await Store.putBlob(ph.id + ':t', await canvasBlob(renderEdited(img, ph.edit, 360), 0.72));
+  dropCache(ph.id);
+}
+
+/* 写真番号：Vessel-Date-Area-Seq */
+function photoNumbers() {
+  const m = new Map();
+  if (!S.visit) return m;
+  const vn = (S.visit.vesselName || '').replace(/\s+/g, '').toUpperCase();
+  const d = (S.visit.date || '').replace(/-/g, '');
+  const seq = {};
+  S.photos.filter(isAssigned).sort((a, b) => a.takenAt - b.takenAt).forEach(p => {
+    const c = S.locMap.get(p.loc).cat;
+    seq[c] = (seq[c] || 0) + 1;
+    m.set(p.id, `${vn}-${d}-${c}-${pad3(seq[c])}`);
+  });
+  return m;
+}
+
+/* ================= 描画 ================= */
+const sortedVisits = () => [...S.visits].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.createdAt - a.createdAt);
+const visitLabel = v => `${v.vesselName}　${v.date}${v.port ? '　' + v.port : ''}`;
+
+function render() {
+  const tab = S.visit ? S.tab : 'matrix';
+  document.body.classList.toggle('tab-tray', tab === 'tray');
+  document.body.classList.toggle('tab-matrix', tab === 'matrix');
+  $('#tabs').hidden = !S.visit;
+  const sel = $('#visitSel'), list = sortedVisits();
+  sel.innerHTML = list.length ? list.map(v => `<option value="${v.id}" ${S.visit && v.id === S.visit.id ? 'selected' : ''}>${esc(visitLabel(v))}</option>`).join('') : '<option>訪船がありません</option>';
+  sel.disabled = !list.length;
+  $('#btnVisit').disabled = !S.visit;
+  $('#btnReport').disabled = !S.visit;
+  renderMatrix();
+  renderTray();
+  const un = S.photos.filter(p => !isAssigned(p)).length;
+  $('#tabTray').textContent = `未振り分け（${un}）`;
+  $('#tabTray').classList.toggle('cur', tab === 'tray');
+  $('#tabMatrix').classList.toggle('cur', tab === 'matrix');
+}
+
+function todoBar() {
+  const nc = S.photos.filter(p => !isAssigned(p)).length, nm = S.photos.filter(needsComment).length;
+  if (!nc && !nm) return '';
+  return `<div class="todo"><span>要入力</span>${nc ? `<b>未分類 ${nc}</b>` : ''}${nm ? `<b>未コメント ${nm}</b>` : ''}<span class="sp"></span><button class="primary" data-act="todo">まとめて入力</button></div>`;
+}
+function renderMatrix() {
+  const pane = $('#matrixPane'), v = S.visit;
+  if (!v) {
+    pane.innerHTML = `<div class="welcome"><h2>訪船を作成してください</h2><p>船マスタから船を選び、訪船日と港を登録すると、撮影と分類を始められます。</p><button class="primary" data-act="new">新規訪船</button></div>`;
+    return;
+  }
+  const map = new Map(), rowCnt = new Map(), tabCnt = {};
+  for (const ph of S.photos) {
+    if (!isAssigned(ph)) continue;
+    const keys = ph.items.length ? ph.items : [''];
+    for (const it of keys) { const k = ph.loc + '|' + it; if (!map.has(k)) map.set(k, []); map.get(k).push(ph); }
+    rowCnt.set(ph.loc, (rowCnt.get(ph.loc) || 0) + 1);
+    const t = tabOfCat(S.locMap.get(ph.loc).cat);
+    tabCnt[t] = (tabCnt[t] || 0) + 1; tabCnt.ALL = (tabCnt.ALL || 0) + 1;
+  }
+  for (const a of map.values()) a.sort((x, y) => x.takenAt - y.takenAt);
+  S.cellMap = map;
+  const cols = [{ id: '', short: '－', en: '項目なし' }, ...ITEMS];
+  const n = S.selected.size, done = S.photos.filter(isAssigned).length;
+  const tab = CAT_TABS.find(t => t.id === S.catTab) || CAT_TABS[0];
+  const filtered = S.onlyFilled && !n;
+  const locs = S.locs.filter(l => (!tab.cats || tab.cats.includes(l.cat)) && (!filtered || rowCnt.get(l.id)));
+  let h = `<div class="phead"><h1>${esc(v.vesselName)}</h1><span class="pmeta">${esc(v.date)}${v.port ? '　' + esc(v.port) : ''}　分類済み ${done} / ${S.photos.length}枚</span></div>`;
+  h += todoBar();
+  if (n) h += `<div id="assignBanner"><span>${n}枚を選択中。タブで区画を選び、マス目をタップ</span><button class="primary" data-act="assign">一覧から選ぶ</button><button data-act="clearSel">解除</button></div>`;
+  h += `<div class="ctabs" role="tablist">${CAT_TABS.map(t => `<button role="tab" aria-selected="${t.id === tab.id}" class="ctab ${t.id === tab.id ? 'on' : ''}" data-act="ctab" data-tab="${t.id}">${t.label}${tabCnt[t.id] ? `<span>${tabCnt[t.id]}</span>` : ''}</button>`).join('')}</div>`;
+  h += `<div class="mtools"><label class="chk"><input type="checkbox" id="onlyFilled" ${S.onlyFilled ? 'checked' : ''}>写真のある場所のみ</label>${n && S.onlyFilled ? '<span class="hint">振り分け中はすべての場所を表示</span>' : ''}</div>`;
+  if (!locs.length) {
+    queueMicrotask(() => keepTabVisible(pane));
+    pane.innerHTML = h + `<p class="empty">${tab.id === 'ALL' ? 'まだ分類済みの写真はありません。' : `${esc(tab.label)} に写真はありません。`}<br><button data-act="showAllLocs" style="margin-top:8px">すべての場所を表示</button></p>`;
+    return;
+  }
+  h += `<div class="mwrap"><table class="mx ${n ? 'assigning' : ''}"><thead><tr><th class="corner">場所</th>${cols.map(c => `<th class="${c.id ? '' : 'none'}" title="${esc(c.en)}">${esc(c.short)}</th>`).join('')}</tr></thead><tbody>`;
+  for (const l of locs) {
+    const rc = rowCnt.get(l.id) || 0;
+    h += `<tr><th><span class="ln">${esc(l.name)}</span>${attrBadges(l)}${rc ? `<span class="rowcount">${rc}</span>` : ''}${tab.id === 'ALL' ? `<small class="lc">${esc(CAT_TABS.find(t => t.id === tabOfCat(l.cat)).label)}</small>` : ''}</th>`;
+    for (const c of cols) {
+      const arr = map.get(l.id + '|' + c.id) || [];
+      h += `<td><button class="cell" data-act="cell" data-l="${l.id}" data-i="${c.id}" aria-label="${esc(l.name)} ${esc(c.en)} ${arr.length}枚">${arr.length ? `<img data-thumb="${arr[arr.length - 1].id}" alt=""><span class="cnt">${arr.length}</span>${arr.some(needsComment) ? '<i class="dot" title="未コメントあり"></i>' : ''}` : ''}</button></td>`;
+    }
+    h += '</tr>';
+  }
+  pane.innerHTML = h + '</tbody></table></div>';
+  hydrate(pane);
+  keepTabVisible(pane);
+}
+function keepTabVisible(pane) {
+  const bar = pane.querySelector('.ctabs'), on = bar?.querySelector('.ctab.on');
+  if (bar && on) bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - (bar.clientWidth - on.offsetWidth) / 2);
+}
+
+const unassigned = () => S.photos.filter(p => !isAssigned(p)).sort((a, b) => a.takenAt - b.takenAt);
+function groupsOf(list) {
+  const g = []; let cur = null;
+  for (const ph of list) {
+    if (!cur || ph.takenAt - cur.end > S.gapMin * 60000) { cur = { items: [], start: ph.takenAt, end: ph.takenAt }; g.push(cur); }
+    cur.items.push(ph); cur.end = ph.takenAt;
+  }
+  return g;
+}
+function thumbHTML(ph) {
+  const on = S.selected.has(ph.id);
+  return `<div class="th ${on ? 'on' : ''}" role="button" tabindex="0" aria-pressed="${on}" data-act="toggle" data-id="${ph.id}"><img data-thumb="${ph.id}" alt="${esc(ph.name)}"><span class="t">${fmtTime(ph.takenAt)}</span>${needsComment(ph) ? '<span class="nc">未コメ</span>' : ''}<button class="zoom" data-act="view" data-id="${ph.id}" aria-label="拡大表示">⤢</button></div>`;
+}
+function renderTray() {
+  const un = unassigned(), box = $('#tray');
+  $('#unCount').textContent = un.length;
+  $('#selN').textContent = S.selected.size;
+  $('#selbar').hidden = !S.selected.size;
+  $('#todoTray').innerHTML = S.visit ? todoBar() : '';
+  if (!S.visit) { box.innerHTML = ''; return; }
+  if (!un.length) {
+    box.innerHTML = `<p class="empty">${S.photos.length ? '未振り分けの写真はありません。' : '「撮影する」で撮影を始めるか、「取り込み」でカメラの写真をまとめて追加してください（PCはドラッグ＆ドロップも可）。撮影時刻の近い写真ごとに自動でグループ分けされます。'}</p>`;
+    return;
+  }
+  S.groups = groupsOf(un);
+  box.innerHTML = S.groups.map((g, i) => {
+    const all = g.items.every(x => S.selected.has(x.id));
+    return `<div class="group"><label class="ghead"><input type="checkbox" data-g="${i}" ${all ? 'checked' : ''}><span>${fmtDT(g.start)} 〜 ${fmtTime(g.end)}</span><span class="gcount">${g.items.length}枚</span></label><div class="thumbs">${g.items.map(thumbHTML).join('')}</div></div>`;
+  }).join('');
+  hydrate(box);
+}
+
+/* ================= 訪船の切替 ================= */
+function setVesselContext() {
+  S.vessel = S.visit ? S.vessels.find(x => x.id === S.visit.vesselId) || null : null;
+  S.locs = S.vessel ? buildLocations(S.vessel) : [];
+  S.locMap = new Map(S.locs.map(l => [l.id, l]));
+}
+async function openVisit(id) {
+  S.visit = S.visits.find(x => x.id === id) || null;
+  S.selected.clear();
+  clearCaches();
+  setVesselContext();
+  S.photos = S.visit ? await Store.listPhotos(id) : [];
+  S.equip = S.vessel ? await Store.listEquip(S.vessel.id) : [];
+  for (const p of S.photos) {
+    const it = (p.items || []).filter(i => ITEM_IDS.has(i));
+    if (it.length !== (p.items || []).length) { p.items = it; await Store.putPhoto(p); }
+  }
+  S.catTab = 'ALL';
+  render();
+}
+function toggle(id) { S.selected.has(id) ? S.selected.delete(id) : S.selected.add(id); render(); }
+
+async function assignCell(locId, itemId) {
+  const ids = [...S.selected];
+  for (const id of ids) {
+    const ph = S.photos.find(x => x.id === id); if (!ph) continue;
+    if (ph.loc !== locId) { ph.loc = locId; ph.items = itemId ? [itemId] : []; }
+    else if (itemId && !ph.items.includes(itemId)) ph.items.push(itemId);
+    await Store.putPhoto(ph);
+  }
+  S.selected.clear();
+  if (isMobile() && unassigned().length) S.tab = 'tray';
+  render();
+  toast(`${ids.length}枚を「${S.locMap.get(locId).name}${itemId ? ' × ' + itemName(itemId) : ''}」に振り分けました`);
+}
+
+/* ================= 部品 ================= */
+function openModal({ title, body, footer = '', wide = false, onClose = null }) {
+  const m = $('#modal');
+  m.innerHTML = `<div class="dlg ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><h3>${esc(title)}</h3><button class="x" data-act="close" aria-label="閉じる">✕</button></header><div class="body">${body}</div>${footer ? `<footer>${footer}</footer>` : ''}</div>`;
+  m.hidden = false;
+  S.onClose = onClose;
+  return m.querySelector('.dlg');
+}
+function closeModal() {
+  const m = $('#modal');
+  if (m.hidden) return;
+  const cb = S.onClose; S.onClose = null;
+  m.hidden = true; m.innerHTML = '';
+  cb && cb();
+}
+
+const itemChips = sel => ITEMS.map(i => `<button type="button" class="ich ${sel.includes(i.id) ? 'on' : ''}" data-act="ich" data-item="${i.id}" title="${esc(i.en)}（${esc(i.ja)}）">${esc(i.short)}</button>`).join('');
+const readChips = root => [...root.querySelectorAll('.ich.on')].map(b => b.dataset.item);
+
+const locPickerHTML = () => `<div class="lp"><div class="lprow"><input type="search" class="lpq" placeholder="検索（例: dg2, me, h3, paint）" autocomplete="off" enterkeyhint="search"><select class="lpcat" aria-label="カテゴリ"><option value="">全カテゴリ</option>${CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div><div class="lplist" role="listbox"></div></div>`;
+function mountLocPicker(root, value, onPick, locs) {
+  const q = root.querySelector('.lpq'), cat = root.querySelector('.lpcat'), list = root.querySelector('.lplist');
+  let cur = value;
+  const draw = () => {
+    const searching = !!norm(q.value);
+    let arr = searchLocs(locs || S.locs, q.value);
+    if (cat.value) arr = arr.filter(l => l.cat === cat.value);
+    let h = '', last = null;
+    for (const l of arr) {
+      if (!searching && l.cat !== last) { h += `<div class="lpg">${esc(catName(l.cat))}</div>`; last = l.cat; }
+      h += `<button type="button" class="lpi ${l.id === cur ? 'on' : ''}" role="option" aria-selected="${l.id === cur}" data-loc="${l.id}"><span>${esc(l.name)}</span>${attrBadges(l)}${searching ? `<small>${esc(catName(l.cat))}</small>` : ''}</button>`;
+    }
+    list.innerHTML = h || '<p class="empty" style="padding:12px">該当する場所がありません</p>';
+  };
+  q.addEventListener('input', draw);
+  cat.addEventListener('change', draw);
+  list.addEventListener('click', e => { const b = e.target.closest('[data-loc]'); if (!b) return; cur = b.dataset.loc; draw(); onPick(cur); });
+  q.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); list.querySelector('[data-loc]')?.click(); } });
+  draw();
+  if (cur) list.querySelector('.lpi.on')?.scrollIntoView({ block: 'center' });
+  return { focus: () => q.focus(), set(v) { cur = v; draw(); } };
+}
+
+/* ================= 船マスタ ================= */
+function openVessels() {
+  const dlg = openModal({ title: '船マスタ', wide: true, body: '<div id="vmBody"></div>', footer: '<span class="sp"></span><button data-act="close">閉じる</button>' });
+  const body = dlg.querySelector('#vmBody');
+  const listView = () => {
+    body.innerHTML = `<table class="vtable"><thead><tr><th>Vessel Name</th><th>IMO</th><th>Flag</th><th>Class</th><th>Hold / Crane / G/E</th><th>場所数</th><th></th></tr></thead><tbody>
+      ${S.vessels.map(v => `<tr><td><b>${esc(v.name)}</b></td><td>${esc(v.imo) || '<span class="hint">未登録</span>'}</td><td>${esc(v.flag)}</td><td>${esc(v.cls) || '<span class="hint">未登録</span>'}</td><td>${v.holds} / ${v.cranes} / ${v.gens}</td><td>${buildLocations(v).length}</td><td><button data-m="edit" data-id="${v.id}">編集</button></td></tr>`).join('')}
+      </tbody></table><p><button class="primary" data-m="add">船を登録</button></p>`;
+  };
+  const formView = v => {
+    const t = v.tanks;
+    const tankRow = tt => { const c = t[tt.key]; return `<div class="tankbox"><div class="trow"><label class="chk"><input type="checkbox" data-tk="${tt.key}" data-f="on" ${c.on ? 'checked' : ''}>${tt.label}</label>
+      <label class="tf"><span>Tank No.</span><input data-tk="${tt.key}" data-f="nos" value="${esc(c.nos)}" placeholder="例: 1-4 / 1,2,4,5" inputmode="text"></label>
+      <label class="tf"><span>区分</span><select data-tk="${tt.key}" data-f="side"><option value="ps" ${c.side === 'ps' ? 'selected' : ''}>P / S</option><option value="pcs" ${c.side === 'pcs' ? 'selected' : ''}>P / C / S</option><option value="none" ${c.side === 'none' ? 'selected' : ''}>分けない</option></select></label></div>
+      <div class="hint" data-prev="${tt.key}"></div></div>`; };
+    body.innerHTML = `<div class="vm">
+      <div class="grid2"><label class="field"><span>Vessel Name</span><input id="vName" value="${esc(v.name)}"></label><label class="field"><span>IMO Number</span><input id="vImo" value="${esc(v.imo)}" inputmode="numeric"></label>
+      <label class="field"><span>Flag</span><input id="vFlag" value="${esc(v.flag)}" list="flagList"><datalist id="flagList"><option value="Panama"><option value="Liberia"><option value="Marshall Islands"><option value="Japan"></datalist></label>
+      <label class="field"><span>Class</span><input id="vCls" value="${esc(v.cls)}" list="clsList"><datalist id="clsList"><option value="NK"><option value="ABS"><option value="BV"><option value="DNV"><option value="LR"><option value="KR"></datalist></label></div>
+      <h4>設備構成</h4>
+      <div class="grid3"><label class="field"><span>Cargo Hold数</span><input id="vHolds" type="number" min="0" max="12" value="${v.holds}"></label><label class="field"><span>Deck Crane数</span><input id="vCranes" type="number" min="0" max="8" value="${v.cranes}"></label><label class="field"><span>Generator数</span><input id="vGens" type="number" min="0" max="6" value="${v.gens}"></label></div>
+      <h4>Tank Configuration</h4>
+      <div class="tankbox"><label class="chk"><input type="checkbox" id="tFpt" ${t.fpt ? 'checked' : ''}>FPT</label><label class="chk" style="margin-top:6px"><input type="checkbox" id="tApt" ${t.apt ? 'checked' : ''}>APT</label></div>
+      <p class="hint" style="margin:0 0 8px">Tank No. はHold数とは別に指定します。連番は「1-4」、飛び番は「1,2,4,5」のように入力してください。</p>
+      ${TANK_TYPES.map(tankRow).join('')}
+      <p class="hint" id="vCount"></p>
+      <p style="display:flex;gap:8px;flex-wrap:wrap"><button data-m="back">一覧に戻る</button>${S.vessels.some(x => x.id === v.id) ? '<button class="danger" data-m="del">この船を削除</button>' : ''}<span class="sp"></span><button class="primary" data-m="save">保存</button></p>
+      <p class="hint">Hold数やタンク構成を減らすと、該当する場所の写真は削除されず「未振り分け」に表示されます（元に戻すと再表示されます）。</p></div>`;
+    const read = () => {
+      v.name = body.querySelector('#vName').value.trim(); v.imo = body.querySelector('#vImo').value.trim();
+      v.flag = body.querySelector('#vFlag').value.trim(); v.cls = body.querySelector('#vCls').value.trim();
+      v.holds = Math.max(0, Math.min(12, +body.querySelector('#vHolds').value || 0));
+      v.cranes = Math.max(0, Math.min(8, +body.querySelector('#vCranes').value || 0));
+      v.gens = Math.max(0, Math.min(6, +body.querySelector('#vGens').value || 0));
+      t.fpt = body.querySelector('#tFpt').checked; t.apt = body.querySelector('#tApt').checked;
+      
+      body.querySelectorAll('[data-tk]').forEach(el => { t[el.dataset.tk][el.dataset.f] = el.type === 'checkbox' ? el.checked : el.value.trim(); });
+      for (const tt of TANK_TYPES) {
+        const c = t[tt.key], nos = parseNos(c.nos), sides = SIDES[c.side] || SIDES.ps;
+        const el = body.querySelector(`[data-prev="${tt.key}"]`);
+        el.textContent = !c.on ? '登録しない' : !nos.length ? 'Tank No. を入力してください' :
+          `${nos.length * sides.length}基：${nos.slice(0, 3).map(i => `${tt.pre} No.${i}${sides[0] ? ' ' + sides.join('/') : ''}`).join('、')}${nos.length > 3 ? ' …' : ''}`;
+      }
+      body.querySelector('#vCount').textContent = `このマスタから生成される場所：${buildLocations(v).length}か所`;
+    };
+    body.oninput = () => read();
+    body.onchange = () => read();
+    read();
+    body._cur = v;
+  };
+  body.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    switch (b.dataset.m) {
+      case 'add': formView(newVessel('')); break;
+      case 'edit': formView(clone(S.vessels.find(x => x.id === b.dataset.id))); break;
+      case 'back': body.oninput = body.onchange = null; listView(); break;
+      case 'save': {
+        const v = body._cur;
+        if (!v.name) { alert('Vessel Name を入力してください'); return; }
+        v.updatedAt = Date.now();
+        await Store.putVessel(v);
+        const i = S.vessels.findIndex(x => x.id === v.id);
+        if (i >= 0) S.vessels[i] = v; else S.vessels.push(v);
+        for (const vi of S.visits.filter(x => x.vesselId === v.id && x.vesselName !== v.name)) { vi.vesselName = v.name; await Store.putVisit(vi); }
+        if (S.visit) { setVesselContext(); render(); }
+        body.oninput = body.onchange = null; listView(); toast(`${v.name} を保存しました`);
+        break;
+      }
+      case 'del': {
+        const v = body._cur;
+        if (S.visits.some(x => x.vesselId === v.id)) { alert('この船の訪船記録があるため削除できません。先に訪船を削除してください。'); return; }
+        if (!confirm(`${v.name} を削除しますか？`)) return;
+        await Store.deleteVessel(v.id);
+        S.vessels = S.vessels.filter(x => x.id !== v.id);
+        body.oninput = body.onchange = null; listView();
+        break;
+      }
+    }
+  });
+  listView();
+}
+
+/* ================= 訪船 ================= */
+function openNewVisit() {
+  if (!S.vessels.length) { openVessels(); toast('先に船マスタに船を登録してください'); return; }
+  const dlg = openModal({
+    title: '新規訪船',
+    body: `<label class="field"><span>Vessel</span><select id="nVessel">${S.vessels.map(v => `<option value="${v.id}" ${S.vessel?.id === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select></label>
+      <label class="field"><span>Visit Date</span><input id="nDate" type="date" value="${todayStr()}"></label>
+      <label class="field"><span>Port</span><input id="nPort" placeholder="例: Kashima" list="portList"><datalist id="portList">${[...new Set(S.visits.map(v => v.port).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('')}</datalist></label>`,
+    footer: `<span class="sp"></span><button data-act="close">キャンセル</button><button class="primary" data-m="create">作成</button>`
+  });
+  dlg.addEventListener('click', async e => {
+    if (!e.target.closest('[data-m="create"]')) return;
+    const vs = S.vessels.find(x => x.id === dlg.querySelector('#nVessel').value);
+    const v = { id: uid(), vesselId: vs.id, vesselName: vs.name, date: dlg.querySelector('#nDate').value || todayStr(), port: dlg.querySelector('#nPort').value.trim(), createdAt: Date.now() };
+    await Store.putVisit(v);
+    S.visits.push(v);
+    closeModal();
+    S.tab = 'tray';
+    await openVisit(v.id);
+    toast(`${vs.name} の訪船を作成しました`);
+  });
+}
+function openVisitInfo() {
+  const v = S.visit; if (!v) return;
+  const dlg = openModal({
+    title: '訪船情報',
+    body: `<label class="field"><span>Vessel</span><input value="${esc(v.vesselName)}" disabled></label>
+      <label class="field"><span>Visit Date</span><input id="iDate" type="date" value="${esc(v.date)}"></label>
+      <label class="field"><span>Port</span><input id="iPort" value="${esc(v.port)}"></label>
+      <p class="hint">写真 ${S.photos.length}枚（レポート除外 ${S.photos.filter(p => !p.include).length}枚）</p>`,
+    footer: `<button class="danger" data-m="del">この訪船を削除</button><span class="sp"></span><button data-act="close">キャンセル</button><button class="primary" data-m="save">保存</button>`
+  });
+  dlg.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    if (b.dataset.m === 'save') {
+      v.date = dlg.querySelector('#iDate').value || v.date; v.port = dlg.querySelector('#iPort').value.trim();
+      await Store.putVisit(v); closeModal(); render(); toast('訪船情報を保存しました');
+    } else if (b.dataset.m === 'del') {
+      if (!confirm(`「${visitLabel(v)}」と写真${S.photos.length}枚を削除します。元に戻せません。削除しますか？`)) return;
+      await Store.deleteVisit(v.id);
+      S.visits = S.visits.filter(x => x.id !== v.id);
+      closeModal();
+      const nx = sortedVisits()[0];
+      if (nx) await openVisit(nx.id); else { S.visit = null; S.photos = []; setVesselContext(); render(); }
+      toast('訪船を削除しました');
+    }
+  });
+}
+
+/* ================= 一括振り分け ================= */
+function openAssign(ids) {
+  if (!ids.length) return;
+  let loc = null;
+  const dlg = openModal({
+    title: `${ids.length}枚を振り分け`, wide: true,
+    body: `<div class="asg"><div><h4>場所</h4>${locPickerHTML()}</div><div><h4>項目（複数選択可）</h4><div class="ichips">${itemChips([])}</div>
+      <p><label class="chk"><input type="checkbox" id="asAdd">同じ場所の写真は、既存の項目に追加する（オフ：置き換え）</label></p></div></div>`,
+    footer: `<span class="hint" id="asSel">場所を選んでください</span><span class="sp"></span><button data-act="close">キャンセル</button><button class="primary" data-m="apply" disabled>振り分ける</button>`
+  });
+  const lp = mountLocPicker(dlg.querySelector('.lp'), null, id => {
+    loc = id;
+    dlg.querySelector('#asSel').textContent = `場所：${S.locMap.get(id).name}`;
+    dlg.querySelector('[data-m="apply"]').disabled = false;
+  });
+  if (!isMobile()) lp.focus();
+  dlg.addEventListener('click', async e => {
+    if (!e.target.closest('[data-m="apply"]') || !loc) return;
+    const items = readChips(dlg), add = dlg.querySelector('#asAdd').checked;
+    for (const id of ids) {
+      const ph = S.photos.find(x => x.id === id); if (!ph) continue;
+      if (add && ph.loc === loc) ph.items = [...new Set([...ph.items, ...items])];
+      else { ph.loc = loc; ph.items = items; }
+      await Store.putPhoto(ph);
+    }
+    S.selected.clear();
+    closeModal();
+    if (S.catTab !== 'ALL') S.catTab = tabOfCat(S.locMap.get(loc).cat);
+    if (isMobile() && unassigned().length) S.tab = 'tray';
+    render();
+    toast(`${ids.length}枚を ${S.locMap.get(loc).name} に振り分けました`);
+  });
+}
+
+/* ================= マス目の写真一覧 ================= */
+function openCell(locId, itemId) {
+  const l = S.locMap.get(locId);
+  const arr = S.cellMap.get(locId + '|' + itemId) || [];
+  const nums = photoNumbers();
+  const sel = new Set();
+  const dlg = openModal({
+    title: `${l.name} × ${itemId ? itemName(itemId) : '項目なし'}（${arr.length}枚）`, wide: true,
+    body: `<div class="cgrid">${arr.map(ph => `<div class="ci"><button class="cthumb" data-m="open" data-id="${ph.id}" aria-label="${esc(nums.get(ph.id))}を開く"><img data-thumb="${ph.id}" alt=""></button><label><input type="checkbox" data-id="${ph.id}">${esc(nums.get(ph.id)?.split('-').pop())}　${fmtTime(ph.takenAt)}${needsComment(ph) ? '<span class="tag fl">未コメント</span>' : ''}${ph.edit?.shapes?.length ? '<span class="tag">書き込み</span>' : ''}${ph.major ? '<span class="tag ex">Major</span>' : ''}${ph.include ? '' : '<span class="tag ex">レポート除外</span>'}</label>${eqById(ph.equipId) ? `<div class="hint">${esc(eqLabel(eqById(ph.equipId)))}</div>` : ''}</div>`).join('')}</div>`,
+    footer: `<span class="hint" id="cSel">写真を選ぶと移動できます</span><span class="sp"></span>${itemId ? '<button data-m="unitem" disabled>この項目から外す</button>' : ''}<button data-m="back" disabled>未振り分けに戻す</button><button class="primary" data-m="move" disabled>別の場所へ移動</button>`
+  });
+  hydrate(dlg);
+  const upd = () => {
+    dlg.querySelector('#cSel').textContent = sel.size ? `${sel.size}枚選択中` : '写真を選ぶと移動できます';
+    dlg.querySelectorAll('footer button[data-m]').forEach(b => b.disabled = !sel.size);
+  };
+  dlg.addEventListener('change', e => { const id = e.target.dataset.id; if (id) { e.target.checked ? sel.add(id) : sel.delete(id); upd(); } });
+  dlg.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    const m = b.dataset.m;
+    if (m === 'open') {
+      closeModal();
+      openViewer(arr.map(x => x.id), b.dataset.id, () => { if (S.cellMap.get(locId + '|' + itemId)?.length) openCell(locId, itemId); });
+      return;
+    }
+    const phs = [...sel].map(id => S.photos.find(x => x.id === id));
+    if (m === 'back') { for (const ph of phs) { ph.loc = null; ph.items = []; await Store.putPhoto(ph); } closeModal(); render(); toast(`${phs.length}枚を未振り分けに戻しました`); }
+    else if (m === 'unitem') { for (const ph of phs) { ph.items = ph.items.filter(x => x !== itemId); await Store.putPhoto(ph); } closeModal(); render(); toast(`${phs.length}枚から ${itemName(itemId)} を外しました`); }
+    else if (m === 'move') { closeModal(); openAssign([...sel]); }
+  });
+}
+
+/* ================= 写真ビューア ================= */
+function openViewer(ids, startId, back, opts = {}) {
+  const queue = !!opts.queue;
+  ids = [...ids];
+  let idx = Math.max(0, ids.indexOf(startId)), ph = null, img = null, dirty = false, saveT = null, token = 0;
+  const onKey = e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) || !$('#pe').hidden) return;
+    if (e.key === 'ArrowLeft') go(-1);
+    if (e.key === 'ArrowRight') go(1);
+  };
+  const onResize = () => paint();
+  const dlg = openModal({
+    title: '写真', wide: true,
+    footer: `<button data-m="prev">◀ 前へ</button><span class="pvpos" id="pvPos"></span><span class="sp"></span><button class="primary" data-m="next">次へ ▶</button>`,
+    onClose: async () => { document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); await flush(); render(); back && back(); },
+    body: `<div class="pv"><div><div class="pvstage" id="pvStage"><canvas id="pvCan"></canvas></div>
+      <div class="pvtools"><button data-m="edit">書き込み・編集</button><span class="sp"></span><span id="pvFlags"></span></div></div>
+      <div><div class="pno" id="pvNo"></div><div class="meta" id="pvMeta"></div>
+      <div class="field"><span>場所</span><button class="locbtn" data-m="loc" id="pvLoc"></button><div class="inlp" id="pvLp" hidden>${locPickerHTML()}<p style="display:flex;gap:6px;margin:8px 0 0"><button data-m="unloc">未振り分けにする</button><span class="sp"></span><button data-m="lpclose">閉じる</button></p></div></div>
+      <div class="field"><span>項目（複数選択可）</span><div class="ichips" id="pvItems"></div></div>
+      <div class="field"><span>Equipment</span><div style="display:flex;gap:6px"><select id="pvEq" style="flex:1;min-width:0"></select><button data-m="eqnew">新規</button></div>
+        <div class="inlp" id="pvEqNew" hidden><div class="grid2"><label class="field"><span>Equipment Name</span><input id="qeName"></label><label class="field"><span>Equipment No.</span><input id="qeNo"></label><label class="field"><span>Maker</span><input id="qeMaker"></label><label class="field"><span>Model</span><input id="qeModel"></label></div>
+        <p class="hint" style="margin:0 0 6px">場所はこの写真の場所で登録されます。詳細は「メニュー → Equipment 管理」で編集できます。</p><p style="display:flex;gap:6px;margin:0"><span class="sp"></span><button data-m="eqcancel">キャンセル</button><button class="primary" data-m="eqsave">登録</button></p></div></div>
+      <label class="field"><span>コメント</span><textarea id="pvCom" rows="4" placeholder="指摘内容、対応予定など"></textarea></label>
+      <details class="field" id="pvEnBox"><summary class="hint">英文コメント（英語レポート用・任意）</summary><textarea id="pvComEn" rows="3" placeholder="Remarks in English" style="margin-top:6px"></textarea></details>
+      <p style="display:flex;gap:16px;flex-wrap:wrap"><label class="chk"><input type="checkbox" id="pvMajor">Major Finding</label><label class="chk"><input type="checkbox" id="pvInc">レポートに含める</label></p>
+      <p style="display:flex;gap:6px;flex-wrap:wrap"><button data-m="history">履歴・Before/After 比較</button><span class="sp"></span><button class="danger" data-m="delete">この写真を削除</button></p></div></div>`
+  });
+  document.addEventListener('keydown', onKey);
+  window.addEventListener('resize', onResize);
+  const lpBox = dlg.querySelector('#pvLp');
+  const lp = mountLocPicker(lpBox, null, id => {
+    if (ph.loc !== id) { ph.loc = id; ph.items = []; }
+    lpBox.hidden = true; markDirty(); fill();
+  });
+  const com = dlg.querySelector('#pvCom');
+
+  function markDirty() { dirty = true; clearTimeout(saveT); saveT = setTimeout(flush, 500); }
+  async function flush() { clearTimeout(saveT); if (!dirty || !ph) return; dirty = false; await Store.putPhoto(ph); }
+  function paint() {
+    if (!img || !ph) return;
+    const st = dlg.querySelector('#pvStage'), dpr = window.devicePixelRatio || 1;
+    const c = renderEdited(img, ph.edit, st.clientWidth * dpr, st.clientHeight * dpr);
+    c.id = 'pvCan'; c.style.width = (c.width / dpr) + 'px'; c.style.height = (c.height / dpr) + 'px';
+    dlg.querySelector('#pvCan').replaceWith(c);
+  }
+  function fill() {
+    const l = S.locMap.get(ph.loc);
+    dlg.querySelector('#pvNo').textContent = photoNumbers().get(ph.id) || '未採番（場所を選ぶと採番されます）';
+    dlg.querySelector('#pvLoc').innerHTML = l ? `<span>${esc(l.name)}${attrBadges(l)}</span><small>${esc(catName(l.cat))}</small><span class="sp"></span>変更` : '<span>未振り分け</span><span class="sp"></span>選択';
+    dlg.querySelector('#pvItems').innerHTML = itemChips(ph.items);
+    dlg.querySelector('#pvFlags').innerHTML = flagTags(ph);
+    const mine = S.equip.filter(e => e.locId && e.locId === ph.loc), others = S.equip.filter(e => !(e.locId && e.locId === ph.loc));
+    const opt = e => `<option value="${e.id}">${esc(eqLabel(e))}</option>`;
+    dlg.querySelector('#pvEq').innerHTML = `<option value="">（なし）</option>${mine.length ? `<optgroup label="この場所の機器">${mine.map(opt).join('')}</optgroup>` : ''}${others.length ? `<optgroup label="その他の機器">${others.map(opt).join('')}</optgroup>` : ''}`;
+    dlg.querySelector('#pvEq').value = S.equip.some(e => e.id === ph.equipId) ? ph.equipId : '';
+  }
+  async function load() {
+    await flush();
+    const my = ++token;
+    ph = S.photos.find(x => x.id === ids[idx]);
+    if (!ph) { closeModal(); return; }
+    ph.edit ||= newEdit(); ph.items ||= [];
+    dlg.querySelector('header h3').textContent = queue ? `まとめて入力（${idx + 1} / ${ids.length}）` : `写真 ${idx + 1} / ${ids.length}`;
+    dlg.querySelector('#pvMeta').textContent = `${ph.name}　撮影 ${fmtFull(ph.takenAt)}`;
+    com.value = ph.comment || '';
+    dlg.querySelector('#pvComEn').value = ph.commentEn || '';
+    dlg.querySelector('#pvEnBox').open = !!ph.commentEn;
+    dlg.querySelector('#pvMajor').checked = !!ph.major;
+    dlg.querySelector('#pvEqNew').hidden = true;
+    dlg.querySelector('#pvInc').checked = ph.include !== false;
+    dlg.querySelector('[data-m="prev"]').disabled = idx === 0;
+    const last = idx >= ids.length - 1;
+    dlg.querySelector('[data-m="next"]').textContent = last ? (queue ? '完了' : '閉じる') : (queue ? '次へ ▶' : '次へ ▶');
+    dlg.querySelector('#pvPos').textContent = `${idx + 1} / ${ids.length}`;
+    lpBox.hidden = !(queue && !isAssigned(ph));
+    if (!lpBox.hidden) lp.set(ph.loc);
+    fill();
+    const im = await loadImg(await fullURL(ph.id));
+    if (my !== token) return;
+    img = im; paint();
+  }
+  function go(d) { const n = idx + d; if (n < 0 || n >= ids.length) return; idx = n; load(); }
+
+  com.addEventListener('input', () => { ph.comment = com.value; markDirty(); dlg.querySelector('#pvFlags').innerHTML = flagTags(ph); });
+  dlg.querySelector('#pvInc').addEventListener('change', e => { ph.include = e.target.checked; markDirty(); });
+  dlg.querySelector('#pvMajor').addEventListener('change', e => { ph.major = e.target.checked; markDirty(); });
+  dlg.querySelector('#pvComEn').addEventListener('input', e => { ph.commentEn = e.target.value; markDirty(); });
+  dlg.querySelector('#pvEq').addEventListener('change', e => { ph.equipId = e.target.value || null; markDirty(); });
+  dlg.querySelector('#pvItems').addEventListener('click', e => {
+    const b = e.target.closest('.ich'); if (!b) return;
+    setTimeout(() => { ph.items = readChips(dlg.querySelector('#pvItems')); markDirty(); });
+  });
+  dlg.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    switch (b.dataset.m) {
+      case 'prev': go(-1); break;
+      case 'next': if (idx >= ids.length - 1) closeModal(); else go(1); break;
+      case 'loc': lpBox.hidden = !lpBox.hidden; if (!lpBox.hidden) { lp.set(ph.loc); if (!isMobile()) lp.focus(); } break;
+      case 'lpclose': lpBox.hidden = true; break;
+      case 'unloc': ph.loc = null; ph.items = []; lpBox.hidden = true; markDirty(); fill(); break;
+      case 'edit':
+        if (!img) return;
+        openPhotoEditor(img, ph.edit, async ed => { ph.edit = ed; paint(); dirty = true; await flush(); await refreshThumb(ph, img); });
+        break;
+      case 'eqnew': {
+        const box = dlg.querySelector('#pvEqNew');
+        box.hidden = !box.hidden;
+        if (!box.hidden) { box.querySelectorAll('input').forEach(i => i.value = ''); box.querySelector('#qeName').focus(); }
+        break;
+      }
+      case 'eqcancel': dlg.querySelector('#pvEqNew').hidden = true; break;
+      case 'eqsave': {
+        const name = dlg.querySelector('#qeName').value.trim();
+        if (!name) { alert('Equipment Name を入力してください'); return; }
+        const eq = newEquip(S.vessel.id, ph.loc);
+        Object.assign(eq, { name, eqNo: dlg.querySelector('#qeNo').value.trim(), maker: dlg.querySelector('#qeMaker').value.trim(), model: dlg.querySelector('#qeModel').value.trim() });
+        await Store.putEquip(eq); S.equip.push(eq);
+        ph.equipId = eq.id; markDirty(); fill();
+        dlg.querySelector('#pvEqNew').hidden = true;
+        toast(`${name} を登録しました`);
+        break;
+      }
+      case 'history': await flush(); openCompare(ph); break;
+      case 'delete': {
+        if (!confirm('この写真（元写真を含む）を削除します。元に戻せません。削除しますか？')) return;
+        const id = ph.id;
+        dirty = false; ph = null;
+        await Store.deletePhoto(id);
+        S.photos = S.photos.filter(x => x.id !== id);
+        S.selected.delete(id); dropCache(id);
+        ids.splice(idx, 1);
+        toast('写真を削除しました');
+        if (!ids.length) { closeModal(); return; }
+        idx = Math.min(idx, ids.length - 1);
+        load();
+        break;
+      }
+    }
+  });
+  load();
+}
+
+/* ================= 写真編集 ================= */
+function openPhotoEditor(img, edit0, onDone) {
+  const [W, H] = dimsOf(img);
+  let edit = clone(edit0 || newEdit());
+  const undo = [], redo = [];
+  let tool = 'pen', color = COLORS[0][0], mode = 'draw', showOrig = false, drag = null, crop = null, cropDrag = null, view = null;
+  const pe = $('#pe');
+  const TOOLS = [['pen', 'ペン'], ['arrow', '矢印'], ['circle', '丸'], ['rect', '四角'], ['text', '文字'], ['dim', '寸法']];
+  pe.innerHTML = `<div class="pebar"><button data-e="cancel">キャンセル</button><b id="peTitle">書き込み・編集</b><button class="primary" data-e="done">完了</button></div>
+    <div class="pestage" id="peStage"><canvas id="peBase"></canvas><canvas id="peOv"></canvas></div>
+    <div class="petools" id="peDraw">
+      <div class="perow">${TOOLS.map(([k, n]) => `<button data-e="tool" data-v="${k}" class="${k === tool ? 'on' : ''}">${n}</button>`).join('')}<span class="sep"></span>${COLORS.map(([c, n], i) => `<button class="sw ${i ? '' : 'on'}" data-e="color" data-v="${c}" style="background:${c}" aria-label="${n}"></button>`).join('')}</div>
+      <div class="perow"><button data-e="undo">元に戻す</button><button data-e="redo">やり直す</button><button data-e="clear">全削除</button><span class="sep"></span><button data-e="orig" id="peOrig">元写真</button><button data-e="rot">回転</button><button data-e="crop">トリミング</button><span class="sep"></span><label>明るさ<input type="range" id="peBright" min="0.5" max="1.8" step="0.05"></label></div>
+    </div>
+    <div class="petools" id="peCrop" hidden><div class="perow"><span class="hint" style="color:#C9D3DC">枠の中をドラッグで移動、外側をドラッグで範囲を指定</span></div>
+      <div class="perow"><button data-e="cropReset">トリミング解除</button><span class="sp"></span><button data-e="cropCancel">キャンセル</button><button class="on" data-e="cropApply">適用</button></div></div>`;
+  pe.hidden = false;
+  const stage = pe.querySelector('#peStage'), base = pe.querySelector('#peBase'), ov = pe.querySelector('#peOv');
+  const bctx = base.getContext('2d'), octx = ov.getContext('2d'), bright = pe.querySelector('#peBright');
+  bright.value = edit.bright;
+
+  const snap = () => { undo.push(JSON.stringify(edit)); redo.length = 0; };
+  const rdims = () => (edit.rot % 180 ? [H, W] : [W, H]);
+
+  function layout() {
+    const [rw0, rh0] = rdims();
+    const rw = showOrig ? W : rw0, rh = showOrig ? H : rh0;
+    const R = (mode === 'crop' || showOrig || !edit.crop) ? { x: 0, y: 0, w: 1, h: 1 } : edit.crop;
+    const cw = Math.max(50, stage.clientWidth - 16), ch = Math.max(50, stage.clientHeight - 16);
+    const s = Math.min(cw / (R.w * rw), ch / (R.h * rh));
+    const w = R.w * rw * s, h = R.h * rh * s, dpr = window.devicePixelRatio || 1;
+    for (const c of [base, ov]) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.width = w + 'px'; c.style.height = h + 'px'; }
+    view = { s, R, rw, rh, dpr };
+    drawBase(); drawOv();
+  }
+  const setT = ctx => { const { s, R, rw, rh, dpr } = view; ctx.setTransform(dpr * s, 0, 0, dpr * s, -R.x * rw * s * dpr, -R.y * rh * s * dpr); };
+  const clearC = (ctx, c) => { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); };
+  function drawBase() {
+    clearC(bctx, base); setT(bctx);
+    drawRotated(bctx, img, showOrig ? 0 : edit.rot, W, H);
+    base.style.filter = showOrig || edit.bright === 1 ? '' : `brightness(${edit.bright})`;
+  }
+  function drawOv() {
+    clearC(octx, ov);
+    if (showOrig) return;
+    setT(octx);
+    const { rw, rh, s } = view;
+    for (const sh of edit.shapes) drawShape(octx, sh, rw, rh);
+    if (mode === 'crop' && crop) {
+      const x = crop.x * rw, y = crop.y * rh, w = crop.w * rw, h = crop.h * rh;
+      octx.save();
+      octx.fillStyle = 'rgba(0,0,0,.55)';
+      octx.beginPath(); octx.rect(0, 0, rw, rh); octx.rect(x, y, w, h); octx.fill('evenodd');
+      octx.strokeStyle = '#F0B400'; octx.lineWidth = 3 / s; octx.strokeRect(x, y, w, h);
+      octx.lineWidth = 1 / s; octx.strokeStyle = 'rgba(255,255,255,.6)';
+      for (const k of [1, 2]) {
+        octx.beginPath(); octx.moveTo(x + w * k / 3, y); octx.lineTo(x + w * k / 3, y + h); octx.stroke();
+        octx.beginPath(); octx.moveTo(x, y + h * k / 3); octx.lineTo(x + w, y + h * k / 3); octx.stroke();
+      }
+      octx.restore();
+    }
+  }
+  const pt = e => {
+    const r = ov.getBoundingClientRect(), { s, R, rw, rh } = view;
+    const x = ((e.clientX - r.left) / s + R.x * rw) / rw, y = ((e.clientY - r.top) / s + R.y * rh) / rh;
+    return [Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y))];
+  };
+  const LW = 0.005;
+  const tiny = (a, b) => Math.hypot((a[0] - b[0]) * view.rw, (a[1] - b[1]) * view.rh) * view.s < 6;
+
+  ov.addEventListener('pointerdown', e => {
+    if (showOrig) return;
+    e.preventDefault();
+    ov.setPointerCapture(e.pointerId);
+    const p = pt(e);
+    if (mode === 'crop') {
+      const inside = crop && p[0] > crop.x && p[0] < crop.x + crop.w && p[1] > crop.y && p[1] < crop.y + crop.h;
+      cropDrag = inside ? { move: true, start: p, orig: { ...crop } } : { move: false, start: p };
+      return;
+    }
+    if (tool === 'text') {
+      const t = prompt('書き込む文字');
+      if (t && t.trim()) { snap(); edit.shapes.push({ t: 'text', a: p, text: t.trim(), c: color, size: 0.04 }); drawOv(); }
+      return;
+    }
+    snap();
+    drag = tool === 'pen' ? { t: 'pen', pts: [p], c: color, w: LW } : { t: tool, a: p, b: p, c: color, w: LW };
+    edit.shapes.push(drag);
+    drawOv();
+  });
+  ov.addEventListener('pointermove', e => {
+    if (cropDrag) {
+      const p = pt(e);
+      if (cropDrag.move) {
+        const o = cropDrag.orig;
+        crop.x = Math.min(1 - o.w, Math.max(0, o.x + p[0] - cropDrag.start[0]));
+        crop.y = Math.min(1 - o.h, Math.max(0, o.y + p[1] - cropDrag.start[1]));
+      } else {
+        const a = cropDrag.start;
+        crop = { x: Math.min(a[0], p[0]), y: Math.min(a[1], p[1]), w: Math.abs(p[0] - a[0]), h: Math.abs(p[1] - a[1]) };
+      }
+      drawOv(); return;
+    }
+    if (!drag) return;
+    const p = pt(e);
+    if (drag.t === 'pen') drag.pts.push(p); else drag.b = p;
+    drawOv();
+  });
+  const up = () => {
+    if (cropDrag) { cropDrag = null; if (crop && (crop.w < 0.03 || crop.h < 0.03)) crop = null; drawOv(); return; }
+    if (!drag) return;
+    const d = drag; drag = null;
+    const cancel = () => { edit.shapes.pop(); undo.pop(); drawOv(); };
+    if (d.t !== 'pen' && tiny(d.a, d.b)) { cancel(); return; }
+    if (d.t === 'dim') {
+      const t = prompt('寸法を入力（例: 150 mm）', '');
+      if (t === null) { cancel(); return; }
+      d.text = t.trim();
+    }
+    drawOv();
+  };
+  ov.addEventListener('pointerup', up);
+  ov.addEventListener('pointercancel', up);
+
+  bright.addEventListener('pointerdown', snap);
+  bright.addEventListener('keydown', snap);
+  bright.addEventListener('input', () => { edit.bright = +bright.value; drawBase(); });
+
+  function setMode(m) {
+    mode = m;
+    pe.querySelector('#peDraw').hidden = m === 'crop';
+    pe.querySelector('#peCrop').hidden = m !== 'crop';
+    pe.querySelector('#peTitle').textContent = m === 'crop' ? 'トリミング' : '書き込み・編集';
+    layout();
+  }
+  function rotateEdit() {
+    const r = ([x, y]) => [1 - y, x];
+    for (const s of edit.shapes) {
+      if (s.pts) s.pts = s.pts.map(r);
+      if (s.a) s.a = r(s.a);
+      if (s.b) s.b = r(s.b);
+    }
+    if (edit.crop) { const c = edit.crop; edit.crop = { x: 1 - (c.y + c.h), y: c.x, w: c.h, h: c.w }; }
+    edit.rot = (edit.rot + 90) % 360;
+  }
+  function close() {
+    window.removeEventListener('resize', layout);
+    document.removeEventListener('keydown', onKey, true);
+    pe.hidden = true; pe.innerHTML = '';
+  }
+  function onKey(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); pe.querySelector(e.shiftKey ? '[data-e="redo"]' : '[data-e="undo"]').click(); }
+    if (e.key === 'Escape') { e.stopImmediatePropagation(); pe.querySelector(mode === 'crop' ? '[data-e="cropCancel"]' : '[data-e="cancel"]').click(); }
+  }
+  window.addEventListener('resize', layout);
+  document.addEventListener('keydown', onKey, true);
+
+  pe.onclick = e => {
+    const b = e.target.closest('[data-e]'); if (!b) return;
+    switch (b.dataset.e) {
+      case 'tool': tool = b.dataset.v; pe.querySelectorAll('[data-e="tool"]').forEach(x => x.classList.toggle('on', x === b)); break;
+      case 'color': color = b.dataset.v; pe.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); break;
+      case 'undo': if (undo.length) { redo.push(JSON.stringify(edit)); edit = JSON.parse(undo.pop()); bright.value = edit.bright; layout(); } break;
+      case 'redo': if (redo.length) { undo.push(JSON.stringify(edit)); edit = JSON.parse(redo.pop()); bright.value = edit.bright; layout(); } break;
+      case 'clear': if (edit.shapes.length && confirm('書き込みをすべて消しますか？')) { snap(); edit.shapes = []; drawOv(); } break;
+      case 'orig': showOrig = !showOrig; b.classList.toggle('on', showOrig); b.textContent = showOrig ? '編集後に戻る' : '元写真'; layout(); break;
+      case 'rot': if (showOrig) return; snap(); rotateEdit(); layout(); break;
+      case 'crop': if (showOrig) return; crop = edit.crop ? { ...edit.crop } : { x: 0.1, y: 0.1, w: 0.8, h: 0.8 }; setMode('crop'); break;
+      case 'cropCancel': crop = null; setMode('draw'); break;
+      case 'cropReset': if (edit.crop) { snap(); edit.crop = null; } crop = null; setMode('draw'); break;
+      case 'cropApply': if (crop) { snap(); edit.crop = { ...crop }; } crop = null; setMode('draw'); break;
+      case 'cancel':
+        if (undo.length && !confirm('編集内容を破棄しますか？')) return;
+        close(); break;
+      case 'done': close(); onDone(edit); break;
+    }
+  };
+  requestAnimationFrame(layout);
+}
+
+/* ================= 撮影モード ================= */
+const QUICK = ['錆あり', '塗装剥離', '損傷あり', '漏洩あり', '要修理', '要清掃', '良好', '前回指摘・改善済み', '仮修理中', '書類確認済み'];
+const Cam = { burst: false, saving: Promise.resolve(), pending: 0, uncommented: 0, stream: null, track: null, blob: null, takenAt: 0, count: 0, loc: '', edit: null, work: null, fallback: false, url: '', lp: null };
+
+function camLocLabel() {
+  const l = S.locMap.get(Cam.loc);
+  const t = l ? `${l.name}` : '未指定（後で振り分け）';
+  $('#camLocBtn').textContent = `場所：${t}`;
+  $('#csLoc').textContent = t;
+}
+async function openCam() {
+  if (!S.visit) { openNewVisit(); return; }
+  if (!S.locMap.has(Cam.loc)) Cam.loc = '';
+  $('#camLpBox').innerHTML = locPickerHTML();
+  Cam.lp = mountLocPicker($('#camLpBox .lp'), Cam.loc, id => { Cam.loc = id; camLocLabel(); $('#camLp').hidden = true; });
+  camLocLabel();
+  $('#camChips').innerHTML = QUICK.map(q => `<button type="button" data-c="chip">${esc(q)}</button>`).join('');
+  Cam.count = 0; Cam.uncommented = 0; Cam.blob = null;
+  burstUI(); pendUI();
+  $('#camN').textContent = '0枚'; $('#camLast').hidden = true;
+  $('#camSheet').hidden = true; $('#camBar').hidden = false; $('#camShot').hidden = true; $('#camFb').hidden = true; $('#camLp').hidden = true;
+  $('#cam').hidden = false;
+  await startStream();
+}
+function camReason(e) {
+  const inFrame = (() => { try { return window.top !== window.self; } catch (x) { return true; } })();
+  if (!window.isSecureContext) return '理由：https ではないページのため';
+  if (!navigator.mediaDevices?.getUserMedia) return '理由：このブラウザ（画面）ではカメラ機能が提供されていません' + (inFrame ? '（埋め込み表示）' : '');
+  const n = e?.name || '';
+  if (n === 'NotAllowedError') return inFrame ? '理由：埋め込み表示のためカメラが許可されていません（NotAllowedError）' : '理由：カメラへのアクセスが拒否されています。設定 → Safari → カメラ を「確認」または「許可」にしてください（NotAllowedError）';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return `理由：使用できるカメラが見つかりません（${n}）`;
+  if (n === 'NotReadableError') return '理由：他のアプリがカメラを使用中です（NotReadableError）';
+  return `理由：${n || e?.message || '不明'}`;
+}
+async function startStream() {
+  Cam.fallback = false;
+  $('#camFb').hidden = true;
+  const tryGet = c => navigator.mediaDevices.getUserMedia({ audio: false, video: c });
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('no camera api');
+    try { Cam.stream = await tryGet({ facingMode: { ideal: 'environment' }, width: { ideal: 4032 }, height: { ideal: 3024 } }); }
+    catch (e) { if (e?.name === 'OverconstrainedError') Cam.stream = await tryGet({ facingMode: 'environment' }); else throw e; }
+    Cam.track = Cam.stream.getVideoTracks()[0];
+    const v = $('#camVideo');
+    v.setAttribute('playsinline', ''); v.muted = true;
+    v.srcObject = Cam.stream;
+    try { await v.play(); } catch (e) { /* 自動再生はタップ後に再開 */ }
+  } catch (e) {
+    Cam.fallback = true;
+    $('#camErr').textContent = camReason(e);
+    if (Cam.blob) return;
+    $('#camFb').hidden = false;
+  }
+}
+function stopCam() {
+  Cam.stream?.getTracks().forEach(t => t.stop());
+  Cam.stream = null; Cam.track = null;
+  $('#camVideo').srcObject = null;
+}
+function burstUI() {
+  const b = $('#camBurst');
+  b.textContent = Cam.burst ? '連続 ON' : '連続 OFF';
+  b.classList.toggle('on', Cam.burst);
+  b.setAttribute('aria-pressed', String(Cam.burst));
+  $('#camMode').textContent = Cam.burst ? '連続撮影：撮るとすぐ保存' : '';
+}
+function pendUI() { $('#camPend').textContent = Cam.pending ? `保存中 ${Cam.pending}` : ''; }
+function quickSave(blob, takenAt) {
+  const d = new Date(takenAt);
+  const meta = {
+    name: `IMG_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}_${String(d.getMilliseconds()).padStart(3, '0')}.jpg`,
+    takenAt, comment: '', loc: Cam.loc || null, items: [], edit: newEdit(), major: false
+  };
+  const vid = S.visit.id;
+  Cam.pending++; pendUI();
+  Cam.saving = Cam.saving.then(async () => {
+    try {
+      const ph = await storePhoto(vid, blob, meta);
+      Cam.count++; Cam.uncommented++;
+      $('#camN').textContent = `${Cam.count}枚`;
+      const last = $('#camLast'); last.src = await thumbURL(ph.id); last.hidden = false;
+    } catch (e) { toast('保存できなかった写真があります'); }
+    Cam.pending--; pendUI();
+  });
+}
+async function grabFrame() {
+  let blob = null;
+  if ('ImageCapture' in window && Cam.track) {
+    try { blob = await new ImageCapture(Cam.track).takePhoto(); } catch (e) { blob = null; }
+  }
+  if (!blob) {
+    const v = $('#camVideo');
+    if (!v.videoWidth) { toast('カメラの準備ができていません'); return null; }
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0);
+    blob = await canvasBlob(c, 0.92);
+  }
+  return blob;
+}
+async function burstShot() {
+  const fl = $('#camFlash');
+  fl.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => fl.classList.remove('on')));
+  const takenAt = Date.now();
+  const blob = await grabFrame();
+  if (blob) quickSave(blob, takenAt);
+}
+async function snapPhoto() {
+  const fl = $('#camFlash');
+  fl.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => fl.classList.remove('on')));
+  const blob = await grabFrame();
+  if (blob) showSheet(blob, Date.now());
+}
+async function updateShot() {
+  if (Cam.url) URL.revokeObjectURL(Cam.url);
+  let b = Cam.blob;
+  if (Cam.edit && Cam.work) b = await canvasBlob(renderEdited(Cam.work, Cam.edit, 1600), 0.85);
+  Cam.url = URL.createObjectURL(b);
+  $('#camShot').src = Cam.url;
+  $('#csPen').textContent = Cam.edit?.shapes?.length || Cam.edit?.crop || Cam.edit?.rot ? 'ペンで書き込む（編集済み）' : 'ペンで書き込む';
+}
+function showSheet(blob, takenAt) {
+  Cam.blob = blob; Cam.takenAt = takenAt; Cam.edit = null; Cam.work = null;
+  updateShot();
+  $('#camShot').hidden = false;
+  $('#camFb').hidden = true;
+  $('#camCom').value = '';
+  $('#csMajor').checked = false;
+  $('#csItems').innerHTML = itemChips([]);
+  $('#camBar').hidden = true;
+  $('#camSheet').hidden = false;
+  $('#camSheet').scrollTop = 0;
+  fitShot();
+}
+function fitShot() {
+  const shot = $('#camShot'), sh = $('#camSheet');
+  if (sh.hidden) { shot.style.top = shot.style.height = ''; return; }
+  const top = $('#camTop').offsetHeight;
+  shot.style.top = top + 'px';
+  shot.style.height = `calc(100% - ${top + sh.offsetHeight}px)`;
+}
+function hideSheet() {
+  Cam.blob = null; Cam.edit = null; Cam.work = null;
+  $('#camSheet').hidden = true;
+  $('#camBar').hidden = false;
+  $('#camShot').hidden = true;
+  fitShot();
+  $('#camCom').blur();
+  if (Cam.fallback) $('#camFb').hidden = false;
+}
+async function camSave({ withComment = true, next = true } = {}) {
+  if (Cam.fallback && next) $('#capIn').click(); // 端末カメラの連続起動はタップ操作の中で呼ぶ必要がある
+  const blob = Cam.blob; if (!blob) return;
+  const d = new Date(Cam.takenAt);
+  const meta = {
+    name: `IMG_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.jpg`,
+    takenAt: Cam.takenAt,
+    comment: withComment ? $('#camCom').value.trim() : '',
+    loc: Cam.loc || null,
+    items: readChips($('#csItems')),
+    edit: Cam.edit || newEdit(),
+    major: $('#csMajor').checked
+  };
+  hideSheet();
+  if (!next) exitCam(true);
+  try {
+    const ph = await storePhoto(S.visit.id, blob, meta);
+    Cam.count++;
+    if (!meta.comment) Cam.uncommented++;
+    $('#camN').textContent = `${Cam.count}枚`;
+    const last = $('#camLast');
+    last.src = await thumbURL(ph.id); last.hidden = false;
+    if (!next) render();
+  } catch (e) { toast('写真を保存できませんでした。もう一度撮影してください'); }
+}
+async function exitCam(force) {
+  if (!force && Cam.blob && !confirm('保存していない写真があります。破棄して終了しますか？')) return;
+  hideSheet();
+  stopCam();
+  if (Cam.pending) { $('#progress').hidden = false; $('#pText').textContent = '写真を保存しています'; $('#pBar').style.width = '60%'; }
+  await Cam.saving;
+  $('#progress').hidden = true;
+  $('#cam').hidden = true;
+  $('#camFb').hidden = true;
+  if (Cam.loc) S.catTab = tabOfCat(S.locMap.get(Cam.loc)?.cat);
+  S.tab = Cam.loc ? 'matrix' : 'tray';
+  render();
+  const un = S.photos.filter(needsInput).length;
+  if (Cam.count || force) toast(un ? `撮影を終了しました。未入力の ${un}枚は「まとめて入力」から入力できます` : '撮影を終了しました');
+}
+function bindCam() {
+  $('#cam').addEventListener('click', async e => {
+    const b = e.target.closest('[data-c]'); if (!b) return;
+    switch (b.dataset.c) {
+      case 'shot': if (Cam.fallback) $('#capIn').click(); else if (Cam.burst) burstShot(); else snapPhoto(); break;
+      case 'burst': Cam.burst = !Cam.burst; burstUI(); break;
+      case 'save': camSave(); break;
+      case 'savenc': camSave({ withComment: false }); break;
+      case 'saveexit': camSave({ next: false }); break;
+      case 'retake': hideSheet(); if (Cam.fallback) $('#capIn').click(); break;
+      case 'discard': if (confirm('この写真を削除しますか？')) hideSheet(); break;
+      case 'exit': exitCam(); break;
+      case 'retry': stopCam(); await startStream(); if (!Cam.fallback) toast('アプリ内カメラを起動しました'); break;
+      case 'loc': $('#camLp').hidden = false; Cam.lp.set(Cam.loc); break;
+      case 'lpclose': $('#camLp').hidden = true; break;
+      case 'lpnone': Cam.loc = ''; camLocLabel(); $('#camLp').hidden = true; break;
+      case 'pen': {
+        if (!Cam.blob) return;
+        if (!Cam.work) { const bmp = await decode(Cam.blob); Cam.work = shrinkCanvas(bmp, 2000); bmp.close?.(); }
+        openPhotoEditor(Cam.work, Cam.edit, ed => { Cam.edit = ed; updateShot(); });
+        break;
+      }
+      case 'chip': {
+        const t = $('#camCom'), v = t.value.trim();
+        t.value = v ? `${v}、${b.textContent}` : b.textContent;
+        break;
+      }
+    }
+  });
+  window.addEventListener('resize', () => { if (!$('#cam').hidden) fitShot(); });
+  $('#capIn').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    const ts = (await readExifDate(f)) ?? Date.now();
+    if (Cam.burst) quickSave(f, ts); else showSheet(f, ts);
+  });
+  $('#camCom').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); camSave(); } });
+}
+
+/* ================= 取り込み ================= */
+async function importFiles(fileList) {
+  if (!S.visit) { openNewVisit(); return; }
+  const files = [...fileList].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|heic|heif)$/i.test(f.name));
+  if (!files.length) return;
+  const vid = S.visit.id, prog = $('#progress');
+  prog.hidden = false;
+  let added = 0, skipped = 0; const failed = [];
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    $('#pText').textContent = `取り込み中 ${i + 1} / ${files.length}枚`;
+    $('#pBar').style.width = `${(i / files.length) * 100}%`;
+    try {
+      const takenAt = (await readExifDate(f)) ?? f.lastModified;
+      if (S.photos.some(x => x.name === f.name && x.takenAt === takenAt)) { skipped++; continue; }
+      await storePhoto(vid, f, { name: f.name, takenAt });
+      added++;
+    } catch (e) { failed.push(f.name); }
+  }
+  prog.hidden = true;
+  S.tab = 'tray';
+  render();
+  let msg = `${added}枚を取り込みました`;
+  if (skipped) msg += `（取り込み済みの${skipped}枚は省略）`;
+  if (failed.length) msg += `。${failed.length}枚は読み込めませんでした（ブラウザ非対応の形式の可能性があります）`;
+  toast(msg);
+}
+
+/* ================= Equipment ================= */
+const EQ_FIELDS = [
+  ['name', 'Equipment Name', ['equipment name', 'name', '機器名', '名称']],
+  ['maker', 'Maker', ['maker', 'manufacturer', 'メーカー']],
+  ['model', 'Model', ['model', 'type', '型式']],
+  ['serial', 'Serial No.', ['serial no.', 'serial no', 'serial', '製造番号']],
+  ['eqNo', 'Equipment No.', ['equipment no.', 'equipment no', 'eq no', '機器番号']],
+  ['valveNo', 'Valve No.', ['valve no.', 'valve no', '弁番号']],
+  ['drawingNo', 'Drawing No.', ['drawing no.', 'drawing no', '図面番号']],
+  ['classItem', 'Class Item', ['class item', '船級項目']],
+  ['surveyItem', 'Survey Item', ['survey item', '検査項目']],
+  ['pms', 'PMS Job Code', ['pms job code', 'pms', 'job code']]
+];
+const newEquip = (vesselId, locId) => ({ id: uid(), vesselId, locId: locId || null, name: '', maker: '', model: '', serial: '', eqNo: '', valveNo: '', drawingNo: '', classItem: '', surveyItem: '', pms: '', updatedAt: Date.now() });
+const eqById = id => id ? S.equip.find(e => e.id === id) : null;
+const eqLabel = e => `${e.name}${e.eqNo ? ` [${e.eqNo}]` : ''}`;
+
+function parseCSV(text) {
+  const rows = []; let row = [], cur = '', q = false;
+  text = text.replace(/^\uFEFF/, '');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+const csvCell = v => /[",\n\r]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : String(v ?? '');
+async function download(blob, name) {
+  // 公開ページでは downloads 機能で保存（確認画面が出る）。ローカルファイルとして開いた場合は通常のダウンロード
+  if (window.claude && typeof window.claude.use === 'function') {
+    let dl = null;
+    try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); toast(`${name} を保存しました`); }
+      catch (e) { if (e?.code !== 'declined') toast(`保存できませんでした（${e?.code || 'error'}）`); }
+      return;
+    }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+}
+const safeName = s => String(s).replace(/[\\/:*?"<>|\s]+/g, '_');
+
+function openEquipment() {
+  if (!S.vessels.length) { toast('先に船マスタに船を登録してください'); return; }
+  let vessel = S.vessel || S.vessels[0], list = [], locs = [], locMap = new Map();
+  const dlg = openModal({
+    title: 'Equipment 管理', wide: true,
+    body: `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <select id="eqVessel">${S.vessels.map(v => `<option value="${v.id}" ${v.id === vessel.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
+      <input type="search" id="eqQ" placeholder="機器名・機器番号・場所で絞り込み" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--line);border-radius:6px">
+      <button class="primary" data-m="add">機器を登録</button>
+      <label class="btn">CSV読み込み<input type="file" id="eqCsv" accept=".csv,text/csv" hidden></label>
+      <button data-m="export">CSV書き出し</button></div>
+      <div id="eqBody"></div>`,
+    footer: '<span class="hint">CSVの列名：Location, Equipment Name, Maker, Model, Serial No., Equipment No., Valve No., Drawing No., Class Item, Survey Item, PMS Job Code</span><span class="sp"></span><button data-act="close">閉じる</button>'
+  });
+  const body = dlg.querySelector('#eqBody');
+  const load = async () => {
+    list = await Store.listEquip(vessel.id);
+    locs = buildLocations(vessel); locMap = new Map(locs.map(l => [l.id, l]));
+    draw();
+  };
+  const syncState = () => { if (S.vessel && S.vessel.id === vessel.id) S.equip = list; };
+  const draw = () => {
+    const q = norm(dlg.querySelector('#eqQ').value);
+    const order = new Map(locs.map((l, i) => [l.id, i]));
+    const rows = list.filter(e => !q || norm(`${e.name} ${e.eqNo} ${locMap.get(e.locId)?.name || ''} ${e.maker} ${e.pms}`).includes(q))
+      .sort((a, b) => (order.get(a.locId) ?? 9999) - (order.get(b.locId) ?? 9999) || a.name.localeCompare(b.name));
+    body.innerHTML = rows.length ? `<div style="overflow:auto;max-height:60vh"><table class="eqtable"><thead><tr><th>Location</th><th>Equipment Name</th><th>Equipment No.</th><th>Maker / Model</th><th>PMS Job Code</th><th></th></tr></thead><tbody>
+      ${rows.map(e => { const l = locMap.get(e.locId); return `<tr><td>${l ? esc(l.name) + `<br><span class="hint">${esc(catName(l.cat))}</span>` : '<span class="hint">場所未設定</span>'}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.eqNo)}</td><td>${esc([e.maker, e.model].filter(Boolean).join(' / '))}</td><td>${esc(e.pms)}</td><td><button data-m="edit" data-id="${e.id}">編集</button></td></tr>`; }).join('')}
+      </tbody></table></div><p class="hint">${rows.length} / ${list.length}件</p>`
+      : `<p class="empty">${list.length ? '該当する機器がありません。' : 'まだ機器が登録されていません。「機器を登録」またはCSV読み込みで追加してください。写真ビューアからも登録できます。'}</p>`;
+  };
+  const form = e => {
+    body.innerHTML = `<div class="asg"><div><h4>場所</h4>${locPickerHTML()}</div><div>
+      <div class="grid2">${EQ_FIELDS.map(([k, label]) => `<label class="field"><span>${label}</span><input data-k="${k}" value="${esc(e[k])}"></label>`).join('')}</div>
+      <p class="hint" id="efLoc"></p>
+      <p style="display:flex;gap:8px;flex-wrap:wrap"><button data-m="back">一覧に戻る</button>${list.some(x => x.id === e.id) ? '<button class="danger" data-m="del">削除</button>' : ''}<span class="sp"></span><button class="primary" data-m="save">保存</button></p></div></div>`;
+    const showLoc = () => { body.querySelector('#efLoc').textContent = `場所：${locMap.get(e.locId)?.name || '未設定'}`; };
+    mountLocPicker(body.querySelector('.lp'), e.locId, id => { e.locId = id; showLoc(); }, locs);
+    showLoc();
+    body._e = e;
+    body.querySelector('[data-k="name"]').focus();
+  };
+  dlg.querySelector('#eqVessel').addEventListener('change', ev => { vessel = S.vessels.find(v => v.id === ev.target.value); load(); });
+  dlg.querySelector('#eqQ').addEventListener('input', () => { if (!body._e) draw(); });
+  dlg.querySelector('#eqCsv').addEventListener('change', async ev => {
+    const f = ev.target.files[0]; ev.target.value = '';
+    if (!f) return;
+    const rows = parseCSV(await f.text());
+    if (rows.length < 2) { alert('CSVにデータがありません'); return; }
+    const head = rows[0].map(h => h.trim().toLowerCase());
+    const col = keys => head.findIndex(h => keys.includes(h));
+    const locCol = col(['location', '場所']);
+    const map = EQ_FIELDS.map(([k, , keys]) => [k, col(keys)]);
+    if (map.find(([k]) => k === 'name')[1] < 0) { alert('「Equipment Name」列が見つかりません'); return; }
+    let added = 0, updated = 0, noLoc = 0;
+    for (const r of rows.slice(1)) {
+      const get = i => i >= 0 ? (r[i] || '').trim() : '';
+      const name = get(map.find(([k]) => k === 'name')[1]);
+      if (!name) continue;
+      const eqNo = get(map.find(([k]) => k === 'eqNo')[1]);
+      let e = eqNo ? list.find(x => x.eqNo === eqNo) : null;
+      if (e) updated++; else { e = newEquip(vessel.id, null); list.push(e); added++; }
+      for (const [k, i] of map) if (i >= 0 && get(i)) e[k] = get(i);
+      const ln = get(locCol);
+      if (ln) { const hit = locs.find(l => norm(l.name) === norm(ln)) || searchLocs(locs, ln)[0]; e.locId = hit ? hit.id : e.locId; if (!hit) noLoc++; }
+      else if (!e.locId) noLoc++;
+      e.updatedAt = Date.now();
+      await Store.putEquip(e);
+    }
+    syncState(); draw();
+    toast(`追加 ${added}件・更新 ${updated}件${noLoc ? `（場所が特定できない ${noLoc}件は場所未設定）` : ''}`);
+  });
+  dlg.addEventListener('click', async ev => {
+    const b = ev.target.closest('[data-m]'); if (!b || !body.contains(b) && !['add', 'export'].includes(b.dataset.m)) return;
+    switch (b.dataset.m) {
+      case 'add': form(newEquip(vessel.id, null)); break;
+      case 'edit': form(clone(list.find(x => x.id === b.dataset.id))); break;
+      case 'back': body._e = null; draw(); break;
+      case 'save': {
+        const e = body._e;
+        body.querySelectorAll('[data-k]').forEach(i => { e[i.dataset.k] = i.value.trim(); });
+        if (!e.name) { alert('Equipment Name を入力してください'); return; }
+        e.updatedAt = Date.now();
+        await Store.putEquip(e);
+        const i = list.findIndex(x => x.id === e.id);
+        if (i >= 0) list[i] = e; else list.push(e);
+        syncState(); body._e = null; draw(); toast(`${e.name} を保存しました`);
+        break;
+      }
+      case 'del': {
+        const e = body._e;
+        if (!confirm(`${e.name} を削除しますか？（写真との紐付けは解除されます）`)) return;
+        await Store.deleteEquip(e.id);
+        list = list.filter(x => x.id !== e.id);
+        syncState(); body._e = null; draw();
+        break;
+      }
+      case 'export': {
+        const head = ['Category', 'Location', ...EQ_FIELDS.map(f => f[1])];
+        const lines = [head.join(',')].concat(list.map(e => { const l = locMap.get(e.locId); return [l ? catName(l.cat) : '', l ? l.name : '', ...EQ_FIELDS.map(([k]) => e[k])].map(csvCell).join(','); }));
+        download(new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv' }), `${safeName(vessel.name)}_equipment.csv`);
+        break;
+      }
+    }
+  });
+  load();
+}
+
+/* ================= 検索 ================= */
+async function openSearch() {
+  const [photos, equips] = await Promise.all([Store.allPhotos(), Store.allEquip()]);
+  const visitMap = new Map(S.visits.map(v => [v.id, v]));
+  const eqMap = new Map(equips.map(e => [e.id, e]));
+  const locCache = new Map();
+  const locOf = (vesselId, locId) => {
+    if (!locCache.has(vesselId)) { const v = S.vessels.find(x => x.id === vesselId); locCache.set(vesselId, new Map(v ? buildLocations(v).map(l => [l.id, l]) : [])); }
+    return locCache.get(vesselId).get(locId);
+  };
+  const ports = [...new Set(S.visits.map(v => v.port).filter(Boolean))];
+  const dlg = openModal({
+    title: '検索', wide: true,
+    body: `<div class="grid3">
+      <label class="field"><span>Vessel</span><select id="sV"><option value="">すべて</option>${S.vessels.map(v => `<option value="${v.id}" ${S.vessel?.id === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select></label>
+      <label class="field"><span>Port</span><input id="sPort" list="sPortList"><datalist id="sPortList">${ports.map(p => `<option value="${esc(p)}">`).join('')}</datalist></label>
+      <label class="field"><span>Equipment（名称・機器番号）</span><input id="sEq"></label>
+      <label class="field"><span>Visit Date（から）</span><input id="sFrom" type="date"></label>
+      <label class="field"><span>Visit Date（まで）</span><input id="sTo" type="date"></label>
+      <label class="field"><span>場所・コメント</span><input id="sKw" placeholder="例: me, 錆"></label></div>
+      <p style="display:flex;gap:16px;flex-wrap:wrap;margin:0"><label class="chk"><input type="checkbox" id="sMajor">Major Finding のみ</label><span class="hint" id="sCount"></span></p>
+      <div class="sres" id="sRes"></div>`,
+    footer: '<span class="sp"></span><button data-act="close">閉じる</button>'
+  });
+  const run = () => {
+    const g = id => dlg.querySelector(id).value.trim();
+    const vId = g('#sV'), port = norm(g('#sPort')), eqq = norm(g('#sEq')), kw = norm(g('#sKw')), from = g('#sFrom'), to = g('#sTo'), major = dlg.querySelector('#sMajor').checked;
+    const res = photos.filter(p => {
+      const v = visitMap.get(p.visitId); if (!v) return false;
+      if (vId && v.vesselId !== vId) return false;
+      if (port && !norm(v.port || '').includes(port)) return false;
+      if (from && v.date < from) return false;
+      if (to && v.date > to) return false;
+      if (major && !p.major) return false;
+      if (eqq) { const e = eqMap.get(p.equipId); if (!e || !norm(`${e.name} ${e.eqNo}`).includes(eqq)) return false; }
+      if (kw) {
+        const l = locOf(v.vesselId, p.loc);
+        const hay = `${l?.name || ''} ${(l?.aliases || []).join(' ')} ${p.comment || ''} ${p.commentEn || ''}`;
+        if (!norm(hay).includes(kw)) return false;
+      }
+      return true;
+    }).sort((a, b) => (visitMap.get(b.visitId).date || '').localeCompare(visitMap.get(a.visitId).date || '') || a.takenAt - b.takenAt);
+    dlg.querySelector('#sCount').textContent = `${res.length}件`;
+    const shown = res.slice(0, 200);
+    dlg.querySelector('#sRes').innerHTML = shown.map(p => {
+      const v = visitMap.get(p.visitId), l = locOf(v.vesselId, p.loc), e = eqMap.get(p.equipId);
+      return `<button class="sr" data-m="go" data-id="${p.id}"><img data-thumb="${p.id}" alt=""><span><b>${esc(v.vesselName)}</b>　${esc(v.date)}<small>${esc(v.port || '')}</small>${esc(l?.name || '未振り分け')}${p.major ? ' <span class="tag ex">Major</span>' : ''}${e ? `<small>${esc(eqLabel(e))}</small>` : ''}<small>${esc((p.comment || '').slice(0, 40))}</small></span></button>`;
+    }).join('') + (res.length > 200 ? '<p class="hint">先頭200件を表示しています。条件を絞り込んでください。</p>' : '');
+    hydrate(dlg.querySelector('#sRes'));
+  };
+  dlg.addEventListener('input', run);
+  dlg.addEventListener('change', run);
+  dlg.addEventListener('click', async ev => {
+    const b = ev.target.closest('[data-m="go"]'); if (!b) return;
+    const p = photos.find(x => x.id === b.dataset.id);
+    closeModal();
+    if (!S.visit || S.visit.id !== p.visitId) await openVisit(p.visitId);
+    const ids = S.photos.filter(x => isAssigned(x) ? x.loc === p.loc : !isAssigned(p)).sort((a, c) => a.takenAt - c.takenAt).map(x => x.id);
+    openViewer(ids.includes(p.id) ? ids : [p.id], p.id);
+  });
+  run();
+}
+
+/* ================= 履歴・Before/After 比較 ================= */
+const RANK = { 1: 'Equipment No.', 2: '手動紐付け', 3: 'Equipment Name', 4: 'Location + Item', 5: 'Location', 9: 'その他' };
+let cmpState = null;
+function closeCompare() {
+  const c = $('#cmp');
+  window.removeEventListener('resize', cmpState?.onResize);
+  c.hidden = true; c.innerHTML = '';
+  cmpState = null;
+}
+async function openCompare(cur) {
+  const vesselId = S.visit.vesselId;
+  const visits = S.visits.filter(v => v.vesselId === vesselId && v.id !== S.visit.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const others = (await Promise.all(visits.map(v => Store.listPhotos(v.id)))).flat();
+  const vmap = new Map(visits.map(v => [v.id, v]));
+  const eq = eqById(cur.equipId);
+  const rankOf = p => {
+    const pe = eqById(p.equipId);
+    if (eq && pe && (pe.id === eq.id || (eq.eqNo && pe.eqNo === eq.eqNo))) return 1;
+    if ((cur.links || []).includes(p.id) || (p.links || []).includes(cur.id)) return 2;
+    if (eq && pe && norm(pe.name) === norm(eq.name)) return 3;
+    if (cur.loc && p.loc === cur.loc && p.items.some(i => cur.items.includes(i))) return 4;
+    if (cur.loc && p.loc === cur.loc) return 5;
+    return 9;
+  };
+  const cands = others.map(p => ({ p, r: rankOf(p), v: vmap.get(p.visitId) }));
+  let showAll = false, sel = null, curImg = null, selImg = null;
+  const c = $('#cmp');
+  c.innerHTML = `<div class="pebar"><button data-x="close">閉じる</button><b>履歴・Before / After</b><label class="chk" style="color:#fff"><input type="checkbox" id="cmpAll">すべての過去写真</label></div>
+    <div class="cmpbody"><div class="cmppair">
+      <div class="cmpcol"><h4>BEFORE</h4><div class="cmpimg" id="cmpB"><span class="hint">右の一覧から選んでください</span></div><div class="cmpcap" id="cmpBc"></div></div>
+      <div class="cmpcol"><h4>AFTER（今回）</h4><div class="cmpimg" id="cmpA"></div><div class="cmpcap" id="cmpAc"></div></div>
+    </div><div class="cmplist" id="cmpList"></div></div>`;
+  c.hidden = false;
+  const locName = id => S.locMap.get(id)?.name || '未振り分け';
+  const cap = (p, v) => `${v ? `${v.date}　${v.port || ''}\n` : ''}${locName(p.loc)}${eqById(p.equipId) ? '　' + eqLabel(eqById(p.equipId)) : ''}\n${p.comment || ''}`;
+  const paintInto = (box, img, p) => {
+    if (!img) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cv = renderEdited(img, p.edit, box.clientWidth * dpr, box.clientHeight * dpr);
+    cv.style.width = cv.width / dpr + 'px'; cv.style.height = cv.height / dpr + 'px';
+    box.innerHTML = ''; box.appendChild(cv);
+  };
+  const onResize = () => { paintInto($('#cmpA'), curImg, cur); if (sel) paintInto($('#cmpB'), selImg, sel.p); };
+  cmpState = { onResize };
+  window.addEventListener('resize', onResize);
+  const drawList = () => {
+    const list = cands.filter(x => showAll || x.r < 9).sort((a, b) => a.r - b.r || (b.v.date || '').localeCompare(a.v.date || '') || a.p.takenAt - b.p.takenAt);
+    let h = '';
+    if (!visits.length) h = '<p class="empty">この船の過去の訪船がありません。</p>';
+    else if (!list.length) h = `<p class="empty">一致する過去写真がありません。<br>「すべての過去写真」をオンにすると、手動で紐付けできます。</p>`;
+    let lastV = null;
+    for (const x of list.slice(0, 300)) {
+      if (x.v.id !== lastV) { h += `<div class="cmpv">${esc(x.v.date)}　${esc(x.v.port || '')}</div>`; lastV = x.v.id; }
+      const linked = (cur.links || []).includes(x.p.id);
+      h += `<div class="cmpi ${sel && sel.p.id === x.p.id ? 'on' : ''}" data-x="pick" data-id="${x.p.id}"><img data-thumb="${x.p.id}" alt=""><div class="r"><span class="rk r${x.r}">${RANK[x.r]}</span><div>${esc(locName(x.p.loc))}</div><div class="hint">${esc((x.p.comment || '').slice(0, 30))}</div>
+        <button data-x="link" data-id="${x.p.id}" style="margin-top:4px;padding:3px 8px;font-size:12px">${linked ? '紐付け解除' : '紐付ける'}</button></div></div>`;
+    }
+    const box = $('#cmpList'); box.innerHTML = h; hydrate(box);
+    return list;
+  };
+  const pick = async x => {
+    sel = x; drawList();
+    $('#cmpBc').textContent = cap(x.p, x.v);
+    const img = await loadImg(await fullURL(x.p.id));
+    if (sel !== x) return;
+    selImg = img; paintInto($('#cmpB'), img, x.p);
+  };
+  c.onclick = async ev => {
+    const b = ev.target.closest('[data-x]'); if (!b) return;
+    if (b.dataset.x === 'close') { closeCompare(); return; }
+    const x = cands.find(y => y.p.id === b.dataset.id);
+    if (b.dataset.x === 'link') {
+      ev.stopPropagation();
+      const on = !(cur.links || []).includes(x.p.id);
+      cur.links = (cur.links || []).filter(i => i !== x.p.id); x.p.links = (x.p.links || []).filter(i => i !== cur.id);
+      if (on) { cur.links.push(x.p.id); x.p.links.push(cur.id); }
+      await Store.putPhoto(cur); await Store.putPhoto(x.p);
+      x.r = rankOf(x.p);
+      drawList(); toast(on ? '紐付けました' : '紐付けを解除しました');
+    } else if (b.dataset.x === 'pick') pick(x);
+  };
+  c.querySelector('#cmpAll').addEventListener('change', e => { showAll = e.target.checked; drawList(); });
+  $('#cmpAc').textContent = cap(cur, S.visit);
+  const first = drawList()[0];
+  curImg = await loadImg(await fullURL(cur.id));
+  paintInto($('#cmpA'), curImg, cur);
+  if (first) pick(first);
+}
+
+/* ================= レポート ================= */
+const RL = {
+  title: ['SHIP VISIT REPORT', '訪船報告書'],
+  s1: ['Cover', '表紙'], s2: ['Visit Summary', '訪船概要'], s3: ['Executive Summary', '総括'], s4: ['Major Findings', '主要指摘事項'],
+  s5: ['Area-wise Photos', '区画別写真'], s6: ['Good Practices', 'グッドプラクティス'], s7: ['General Remarks', '所見'], s8: ['Attachments', '添付資料'],
+  vessel: ['Vessel', '船名'], imo: ['IMO No.', 'IMO番号'], flag: ['Flag', '船籍'], cls: ['Class', '船級'], port: ['Port', '訪船港'],
+  date: ['Visit Date', '訪船日'], inspector: ['Superintendent', '訪船者'], attendees: ['Attendees', '立会者'], purpose: ['Purpose', '目的'],
+  photoNo: ['Photo No.', '写真番号'], location: ['Location', '場所'], equipment: ['Equipment', '機器'], items: ['Category', '分類'],
+  comment: ['Remarks', 'コメント'], photos: ['Photos', '写真'], majors: ['Major Findings', '主要指摘'], area: ['Area', '区画'],
+  none: ['None.', '該当なし。'], total: ['Total', '合計'], major: ['MAJOR', '重要'], before: ['BEFORE', '前回'], after: ['AFTER', '今回'],
+  issued: ['Prepared', '作成日'], no: ['No.', 'No.']
+};
+const trl = (k, lang) => lang === 'en' ? RL[k][0] : lang === 'ja' ? RL[k][1] : `${RL[k][0]} / ${RL[k][1]}`;
+const pickText = (ja, en, lang) => lang === 'en' ? (en || ja || '') : lang === 'ja' ? (ja || en || '') : [ja, en].filter(Boolean).join('\n');
+const itemLabel = (id, lang) => { const i = ITEMS.find(x => x.id === id); if (!i) return id; return lang === 'en' ? i.en : lang === 'ja' ? i.ja : `${i.en}（${i.ja}）`; };
+const SECTIONS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'];
+
+function openReportSettings() {
+  const v = S.visit; if (!v) return;
+  const r = v.report || {};
+  const secs = r.sections || SECTIONS;
+  const inc = S.photos.filter(p => p.include !== false && isAssigned(p));
+  const dlg = openModal({
+    title: 'レポート作成', wide: true,
+    body: `<div class="asg"><div>
+      <h4>出力設定</h4>
+      <label class="field"><span>出力言語</span><select id="rLang"><option value="ja">日本語</option><option value="en">English</option><option value="both">日英併記</option></select></label>
+      <label class="field"><span>写真の配置</span><select id="rCols"><option value="2">2列（大きめ）</option><option value="3">3列（枚数重視）</option></select></label>
+      <div class="field"><span>含める章</span>${SECTIONS.map((k, i) => `<label class="chk" style="margin:4px 0"><input type="checkbox" data-sec="${k}" ${secs.includes(k) ? 'checked' : ''}>${i + 1}. ${RL[k][0]}（${RL[k][1]}）</label>`).join('')}</div>
+      <p class="hint">対象の写真：${inc.length}枚（未振り分け・レポート除外の写真は含みません）。Major Finding：${inc.filter(p => p.major).length}枚、Good Practice：${inc.filter(p => p.items.includes('good-practice')).length}枚</p>
+      <p class="hint">PDFは次の画面の「印刷 / PDF保存」から保存します。iPhoneは印刷画面の共有ボタン、Windowsはプリンターで「PDFとして保存」または「Microsoft Print to PDF」を選んでください。</p>
+    </div><div>
+      <h4>訪船情報（表紙・概要）</h4>
+      <div class="grid2"><label class="field"><span>Superintendent（訪船者）</span><input id="rInsp" value="${esc(r.inspector)}"></label><label class="field"><span>Purpose（目的）</span><input id="rPurp" value="${esc(r.purpose)}" placeholder="例: Routine Superintendent Visit" list="purpList"><datalist id="purpList"><option value="Routine Superintendent Visit"><option value="Pre-RightShip Inspection"><option value="PSC Preparation"><option value="Dry Dock Planning"></datalist></label></div>
+      <label class="field"><span>Attendees（立会者）</span><input id="rAtt" value="${esc(r.attendees)}" placeholder="例: Master, C/E, C/O"></label>
+      <label class="field"><span>Executive Summary（日本語）</span><textarea id="rSumJa" rows="3">${esc(r.summaryJa)}</textarea></label>
+      <label class="field"><span>Executive Summary（English）</span><textarea id="rSumEn" rows="3">${esc(r.summaryEn)}</textarea></label>
+      <label class="field"><span>General Remarks（日本語）</span><textarea id="rRemJa" rows="3">${esc(r.remarksJa)}</textarea></label>
+      <label class="field"><span>General Remarks（English）</span><textarea id="rRemEn" rows="3">${esc(r.remarksEn)}</textarea></label>
+      <label class="field"><span>Attachments（1行に1件）</span><textarea id="rAtch" rows="3" placeholder="例: Crew list&#10;Bunker record">${esc(r.attachments)}</textarea></label>
+    </div></div>`,
+    footer: '<span class="sp"></span><button data-act="close">キャンセル</button><button data-m="save">保存のみ</button><button class="primary" data-m="make">レポートを表示</button>'
+  });
+  dlg.querySelector('#rLang').value = r.lang || 'ja';
+  dlg.querySelector('#rCols').value = String(r.cols || 2);
+  dlg.addEventListener('click', async ev => {
+    const b = ev.target.closest('[data-m]'); if (!b) return;
+    const g = id => dlg.querySelector(id).value;
+    v.report = {
+      lang: g('#rLang'), cols: +g('#rCols'),
+      sections: [...dlg.querySelectorAll('[data-sec]')].filter(x => x.checked).map(x => x.dataset.sec),
+      inspector: g('#rInsp').trim(), purpose: g('#rPurp').trim(), attendees: g('#rAtt').trim(),
+      summaryJa: g('#rSumJa'), summaryEn: g('#rSumEn'), remarksJa: g('#rRemJa'), remarksEn: g('#rRemEn'), attachments: g('#rAtch')
+    };
+    await Store.putVisit(v);
+    closeModal();
+    if (b.dataset.m === 'make') buildReport();
+    else toast('レポート設定を保存しました');
+  });
+}
+
+let rpURLs = [];
+function closeReport() {
+  const rp = $('#rp');
+  rp.hidden = true; rp.innerHTML = '';
+  rpURLs.forEach(u => URL.revokeObjectURL(u)); rpURLs = [];
+  document.title = 'Housen Photo';
+}
+async function buildReport() {
+  const v = S.visit, vs = S.vessel || {}, r = v.report || {}, lang = r.lang || 'ja', secs = r.sections || SECTIONS;
+  const T = k => esc(trl(k, lang));
+  const nums = photoNumbers();
+  const order = new Map(S.locs.map((l, i) => [l.id, i]));
+  const photos = S.photos.filter(p => p.include !== false && isAssigned(p))
+    .sort((a, b) => order.get(a.loc) - order.get(b.loc) || a.takenAt - b.takenAt);
+  const prog = $('#progress'); prog.hidden = false;
+  const urls = new Map();
+  const needBA = new Set();
+  // 前回写真（手動紐付け）の Before 表示
+  const beforeOf = new Map();
+  for (const p of photos) {
+    for (const lid of p.links || []) {
+      const o = await Store.getPhoto(lid);
+      if (o && o.visitId !== v.id) { const ov = S.visits.find(x => x.id === o.visitId); if (ov && (ov.date || '') <= (v.date || '')) { beforeOf.set(p.id, { o, ov }); needBA.add(o.id); break; } }
+    }
+  }
+  const all = [...photos.map(p => [p.id, p]), ...[...beforeOf.values()].map(x => [x.o.id, x.o])];
+  for (let i = 0; i < all.length; i++) {
+    const [id, p] = all[i];
+    $('#pText').textContent = `レポートを作成中 ${i + 1} / ${all.length}枚`;
+    $('#pBar').style.width = `${(i / Math.max(1, all.length)) * 100}%`;
+    try {
+      const img = await loadImg(await fullURL(id));
+      const u = URL.createObjectURL(await canvasBlob(renderEdited(img, p.edit, 1100), 0.82));
+      urls.set(id, u); rpURLs.push(u);
+    } catch (e) { /* 画像なしで続行 */ }
+  }
+  prog.hidden = true;
+
+  const cols = r.cols === 3 ? 'c3' : 'c2';
+  const locName = id => S.locMap.get(id)?.name || '';
+  const card = p => {
+    const e = eqById(p.equipId), ba = beforeOf.get(p.id);
+    const img = u => u ? `<img src="${u}" alt="">` : '';
+    const pic = ba ? `<div class="ba"><div><div class="lbl">${T('before')} ${esc(ba.ov.date)}</div><div class="img">${img(urls.get(ba.o.id))}</div></div><div><div class="lbl">${T('after')}</div><div class="img">${img(urls.get(p.id))}</div></div></div>` : `<div class="img">${img(urls.get(p.id))}</div>`;
+    const comment = lang === 'en' ? (p.commentEn || p.comment) : lang === 'ja' ? p.comment : [p.comment, p.commentEn].filter(Boolean).join('\n');
+    return `<div class="rp-card">${pic}<div class="cap"><div class="no">${esc(nums.get(p.id))}${p.major ? `<i>${T('major')}</i>` : ''}</div>
+      <div><b>${esc(locName(p.loc))}</b>${e ? `　${esc(eqLabel(e))}` : ''}</div>
+      ${p.items.length ? `<div class="rp-muted">${p.items.map(i => esc(itemLabel(i, lang))).join(' / ')}</div>` : ''}
+      ${comment ? `<div class="rp-text" style="margin:1mm 0 0">${esc(comment)}</div>` : ''}</div></div>`;
+  };
+  const grid = list => list.length ? `<div class="rp-grid ${cols}">${list.map(card).join('')}</div>` : `<p class="rp-muted">${T('none')}</p>`;
+  const row = (k, val) => val ? `<tr><th>${T(k)}</th><td>${esc(val)}</td></tr>` : '';
+  const particulars = `${row('vessel', v.vesselName)}${row('imo', vs.imo)}${row('flag', vs.flag)}${row('cls', vs.cls)}${row('port', v.port)}${row('date', v.date)}${row('inspector', r.inspector)}${row('attendees', r.attendees)}${row('purpose', r.purpose)}`;
+  let n = 0;
+  const head = k => `<h2>${++n}. ${T(k)}</h2>`;
+  let h = '';
+  let first = true;
+  const sec = (k, inner) => { if (!secs.includes(k)) return; h += `<section class="rp-sec ${first ? 'cont' : ''} ${['s3', 's7', 's8'].includes(k) ? 'cont' : ''}">${head(k)}${inner}</section>`; first = false; };
+
+  if (secs.includes('s1')) {
+    n++;
+    h += `<section class="rp-cover"><div class="kicker">${T('title')}</div><h1>${esc(v.vesselName)}</h1><div class="sub">${esc(v.date)}${v.port ? '　' + esc(v.port) : ''}</div><div class="rp-rule"></div>
+      <table class="rp-t">${particulars}</table><div class="rp-foot">${T('issued')}: ${esc(todayStr())}</div></section>`;
+  }
+  const majors = photos.filter(p => p.major), goods = photos.filter(p => p.items.includes('good-practice'));
+  sec('s2', `<table class="rp-t">${particulars}</table>
+    <table class="rp-t list"><thead><tr><th>${T('area')}</th><th>${T('photos')}</th><th>${T('majors')}</th></tr></thead><tbody>
+    ${CATS.map(c => { const ps = photos.filter(p => S.locMap.get(p.loc).cat === c.id); return ps.length ? `<tr><td>${esc(c.name)}</td><td>${ps.length}</td><td>${ps.filter(p => p.major).length || '-'}</td></tr>` : ''; }).join('')}
+    <tr><th>${T('total')}</th><th>${photos.length}</th><th>${majors.length || '-'}</th></tr></tbody></table>`);
+  sec('s3', `<p class="rp-text">${esc(pickText(r.summaryJa, r.summaryEn, lang)) || `<span class="rp-muted">${T('none')}</span>`}</p>`);
+  sec('s4', majors.length ? `<table class="rp-t list"><thead><tr><th>${T('no')}</th><th>${T('photoNo')}</th><th>${T('location')}</th><th>${T('comment')}</th></tr></thead><tbody>
+      ${majors.map((p, i) => `<tr><td>${i + 1}</td><td>${esc(nums.get(p.id))}</td><td>${esc(locName(p.loc))}${eqById(p.equipId) ? '<br>' + esc(eqLabel(eqById(p.equipId))) : ''}</td><td class="rp-text">${esc(lang === 'en' ? (p.commentEn || p.comment) : lang === 'ja' ? p.comment : [p.comment, p.commentEn].filter(Boolean).join('\n'))}</td></tr>`).join('')}
+      </tbody></table>${grid(majors)}` : `<p class="rp-muted">${T('none')}</p>`);
+  if (secs.includes('s5')) {
+    let inner = '';
+    for (const c of CATS) {
+      const ps = photos.filter(p => S.locMap.get(p.loc).cat === c.id);
+      if (!ps.length) continue;
+      inner += `<h3>${esc(c.name)}</h3>`;
+      const byLoc = new Map();
+      for (const p of ps) { if (!byLoc.has(p.loc)) byLoc.set(p.loc, []); byLoc.get(p.loc).push(p); }
+      for (const [lid, arr] of byLoc) inner += `<h4>${esc(locName(lid))}</h4>${grid(arr)}`;
+    }
+    sec('s5', inner || `<p class="rp-muted">${T('none')}</p>`);
+  }
+  sec('s6', grid(goods));
+  sec('s7', `<p class="rp-text">${esc(pickText(r.remarksJa, r.remarksEn, lang)) || `<span class="rp-muted">${T('none')}</span>`}</p>`);
+  const atts = String(r.attachments || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  sec('s8', atts.length ? `<ol>${atts.map(a => `<li>${esc(a)}</li>`).join('')}</ol>` : `<p class="rp-muted">${T('none')}</p>`);
+
+  const rp = $('#rp');
+  rp.innerHTML = `<div class="rpbar"><button data-r="close">閉じる</button><b>レポート プレビュー（${lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : '日英併記'}）</b><button data-r="settings">設定</button><button class="primary" data-r="print">印刷 / PDF保存</button></div><div class="rp-doc">${h}</div>`;
+  rp.hidden = false; rp.scrollTop = 0;
+  document.title = `${safeName(v.vesselName)}_${(v.date || '').replace(/-/g, '')}_VisitReport`;
+  rp.onclick = ev => {
+    const b = ev.target.closest('[data-r]'); if (!b) return;
+    if (b.dataset.r === 'close') closeReport();
+    else if (b.dataset.r === 'settings') { closeReport(); openReportSettings(); }
+    else if (b.dataset.r === 'print') {
+      const imgs = [...rp.querySelectorAll('img')];
+      Promise.all(imgs.map(i => i.complete ? 0 : new Promise(res => { i.onload = i.onerror = res; }))).then(() => window.print());
+    }
+  };
+}
+
+/* ================= バックアップ ================= */
+const blobToDataURL = b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
+function dataURLToBlob(d) {
+  const [h, b64] = d.split(',');
+  const mime = (h.match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+function openBackup() {
+  const dlg = openModal({
+    title: 'バックアップ',
+    body: `<h4 style="margin:0 0 6px">書き出し</h4>
+      <p class="hint" style="margin-top:0">表示中の訪船（写真・編集内容・船マスタ・Equipment）を1つのファイルに保存します。OneDriveやTeamsに置けば、別の端末で「読み込み」できます。</p>
+      ${S.visit ? `<p><b>${esc(visitLabel(S.visit))}</b>（写真 ${S.photos.length}枚）</p><p><label class="chk"><input type="checkbox" id="bkOrig" checked>元写真を含める（ファイルが大きくなります）</label></p><p><button class="primary" data-m="export">書き出す</button></p>` : '<p class="hint">訪船を選択してください。</p>'}
+      <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+      <h4 style="margin:0 0 6px">読み込み</h4>
+      <p class="hint" style="margin-top:0">書き出したファイルを読み込みます。同じ写真がすでにある場合は読み込みません。</p>
+      <label class="btn">ファイルを選ぶ<input type="file" id="bkFile" accept=".json,application/json" hidden></label>`,
+    footer: '<span class="sp"></span><button data-act="close">閉じる</button>'
+  });
+  dlg.addEventListener('click', async ev => {
+    if (!ev.target.closest('[data-m="export"]')) return;
+    const withOrig = dlg.querySelector('#bkOrig').checked;
+    const v = S.visit, prog = $('#progress');
+    prog.hidden = false;
+    const parts = [`{"format":"housen-photo-backup","version":1,"exportedAt":${Date.now()},"vessel":${JSON.stringify(S.vessel)},"visit":${JSON.stringify(v)},"equipment":${JSON.stringify(S.equip)},"photos":[`];
+    for (let i = 0; i < S.photos.length; i++) {
+      const p = S.photos[i];
+      $('#pText').textContent = `書き出し中 ${i + 1} / ${S.photos.length}枚`;
+      $('#pBar').style.width = `${(i / S.photos.length) * 100}%`;
+      const blobs = {};
+      for (const k of withOrig ? ['o', 'f', 't'] : ['f', 't']) { const b = await Store.getBlob(p.id + ':' + k); if (b) blobs[k] = await blobToDataURL(b); }
+      parts.push((i ? ',' : '') + JSON.stringify({ ...p, _blobs: blobs }));
+    }
+    parts.push(']}');
+    prog.hidden = true;
+    await download(new Blob(parts, { type: 'application/json' }), `${safeName(v.vesselName)}_${(v.date || '').replace(/-/g, '')}_housen.json`);
+  });
+  dlg.querySelector('#bkFile').addEventListener('change', async ev => {
+    const f = ev.target.files[0]; ev.target.value = '';
+    if (!f) return;
+    const prog = $('#progress');
+    prog.hidden = false; $('#pText').textContent = 'ファイルを読み込み中'; $('#pBar').style.width = '0';
+    try {
+      const data = JSON.parse(await f.text());
+      if (data.format !== 'housen-photo-backup') throw new Error('format');
+      const vs = data.vessel, vi = data.visit;
+      const exV = S.vessels.find(x => x.id === vs.id);
+      if (!exV || (vs.updatedAt || 0) > (exV.updatedAt || 0)) {
+        normalizeVessel(vs); await Store.putVessel(vs);
+        if (exV) Object.assign(exV, vs); else S.vessels.push(vs);
+      }
+      const exEq = new Map((await Store.listEquip(vs.id)).map(e => [e.id, e]));
+      for (const e of data.equipment || []) if (!exEq.has(e.id) || (e.updatedAt || 0) > (exEq.get(e.id).updatedAt || 0)) await Store.putEquip(e);
+      if (!S.visits.some(x => x.id === vi.id)) { await Store.putVisit(vi); S.visits.push(vi); }
+      let added = 0, skipped = 0;
+      for (let i = 0; i < data.photos.length; i++) {
+        const { _blobs, ...p } = data.photos[i];
+        $('#pText').textContent = `読み込み中 ${i + 1} / ${data.photos.length}枚`;
+        $('#pBar').style.width = `${(i / data.photos.length) * 100}%`;
+        if (await Store.getPhoto(p.id)) { skipped++; continue; }
+        for (const [k, d] of Object.entries(_blobs || {})) await Store.putBlob(p.id + ':' + k, dataURLToBlob(d));
+        await Store.putPhoto(p); added++;
+      }
+      prog.hidden = true;
+      closeModal();
+      await openVisit(vi.id);
+      toast(`${added}枚を読み込みました${skipped ? `（既存の${skipped}枚は省略）` : ''}`);
+    } catch (e) {
+      prog.hidden = true;
+      alert('読み込めませんでした。Housen Photo で書き出したファイルか確認してください。');
+    }
+  });
+}
+
+/* ================= イベント ================= */
+function bind() {
+  document.addEventListener('click', e => {
+    if (!$('#menu').hidden && !e.target.closest('#menu')) { $('#menu').hidden = true; $('#btnMenu').setAttribute('aria-expanded', 'false'); }
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    if (t.closest('#menu')) { $('#menu').hidden = true; $('#btnMenu').setAttribute('aria-expanded', 'false'); }
+    const a = t.dataset.act;
+    switch (a) {
+      case 'toggle': toggle(t.dataset.id); break;
+      case 'view': e.stopPropagation(); openViewer(unassigned().map(x => x.id), t.dataset.id); break;
+      case 'cell':
+        if (S.selected.size) assignCell(t.dataset.l, t.dataset.i);
+        else if (S.cellMap.get(t.dataset.l + '|' + t.dataset.i)?.length) openCell(t.dataset.l, t.dataset.i);
+        else toast('このマスにはまだ写真がありません。未振り分けの写真を選んでからタップすると振り分けられます');
+        break;
+      case 'ctab': S.catTab = t.dataset.tab; renderMatrix(); $('#matrixPane').querySelector('.mwrap')?.scrollTo(0, 0); break;
+      case 'showAllLocs': S.onlyFilled = false; renderMatrix(); break;
+      case 'todo': {
+        const ids = S.photos.filter(needsInput).sort((a, b) => a.takenAt - b.takenAt).map(p => p.id);
+        if (ids.length) openViewer(ids, ids[0], null, { queue: true });
+        break;
+      }
+      case 'ich': t.classList.toggle('on'); break;
+      case 'clearSel': S.selected.clear(); render(); break;
+      case 'assign': openAssign([...S.selected]); break;
+      case 'tab': S.tab = t.dataset.tab; render(); break;
+      case 'new': openNewVisit(); break;
+      case 'visitInfo': openVisitInfo(); break;
+      case 'vessels': openVessels(); break;
+      case 'equip': openEquipment(); break;
+      case 'search': openSearch(); break;
+      case 'backup': openBackup(); break;
+      case 'report': openReportSettings(); break;
+      case 'menu': { const m = $('#menu'); m.hidden = !m.hidden; t.setAttribute('aria-expanded', String(!m.hidden)); e.stopPropagation(); return; }
+      case 'shoot': openCam(); break;
+      case 'close': closeModal(); break;
+    }
+  });
+  document.addEventListener('change', e => { if (e.target.id === 'onlyFilled') { S.onlyFilled = e.target.checked; renderMatrix(); } });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (!$('#pe').hidden) return;
+      if (!$('#menu').hidden) { $('#menu').hidden = true; return; }
+      if (!$('#cmp').hidden) { closeCompare(); return; }
+      if (!$('#rp').hidden) { closeReport(); return; }
+      if (!$('#cam').hidden) { if (!$('#camLp').hidden) $('#camLp').hidden = true; else if (!$('#camSheet').hidden) hideSheet(); else exitCam(); return; }
+      closeModal();
+    }
+    const t = e.target;
+    if ((e.key === 'Enter' || e.key === ' ') && t.classList?.contains('th')) { e.preventDefault(); toggle(t.dataset.id); }
+  });
+  $('#tray').addEventListener('change', e => {
+    const g = e.target.dataset.g; if (g === undefined) return;
+    S.groups[+g].items.forEach(x => e.target.checked ? S.selected.add(x.id) : S.selected.delete(x.id));
+    render();
+  });
+  $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  $('#visitSel').addEventListener('change', e => openVisit(e.target.value));
+  $('#gapIn').addEventListener('input', e => { S.gapMin = +e.target.value; $('#gapVal').textContent = S.gapMin; renderTray(); });
+  $('#fileLbl').addEventListener('click', e => { if (!S.visit) { e.preventDefault(); openNewVisit(); } });
+  $('#fileIn').addEventListener('change', async e => { await importFiles(e.target.files); e.target.value = ''; });
+  let dragN = 0;
+  window.addEventListener('dragenter', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { dragN++; $('#dropHint').hidden = false; } });
+  window.addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; $('#dropHint').hidden = true; } });
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('#dropHint').hidden = true; if (e.dataTransfer.files.length) importFiles(e.dataTransfer.files); });
+}
+
+
+/* ---- Webアプリ（ホーム画面）用 ---- */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => { navigator.serviceWorker?.register('./sw.js').catch(() => {}); });
+}
+// 端末のストレージが自動削除されないよう永続化を依頼
+navigator.storage?.persist?.().catch(() => {});
+
+(async function boot() {
+  const ok = await Store.init();
+  if (!ok) {
+    const n = $('#notice');
+    n.hidden = false;
+    n.textContent = 'この環境では端末に保存できないため、ページを閉じるとデータが消えます。';
+  }
+  S.vessels = await Store.listVessels();
+  for (const v of S.vessels) if (normalizeVessel(v)) await Store.putVessel(v);
+  if (!S.vessels.length) {
+    // 初期登録（設備構成は仮の値。船マスタで実船に合わせて修正すること）
+    for (const [name, flag] of [['LIMONE', 'Panama'], ['OCEAN RALLY', 'Liberia'], ['ORIENTAL BEAUTY', 'Panama']]) {
+      const v = newVessel(name); v.flag = flag;
+      await Store.putVessel(v); S.vessels.push(v);
+    }
+  }
+  S.visits = await Store.listVisits();
+  bind();
+  bindCam();
+  const first = sortedVisits()[0];
+  if (first) await openVisit(first.id); else render();
+})();
+</script>
+</body>
+</html>
