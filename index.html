@@ -69,6 +69,23 @@ main>*,.pv>*,.asg>*,.cmpbody>*,.grid2>*,.grid3>*{min-width:0}
 .todo button{padding:5px 10px;font-size:13px}
 .trayhead .todo{margin:0 0 8px}
 .citems{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.tag.xl{background:#DDF1E4;color:#1B6B3A}
+.xlmark{position:absolute;right:3px;top:3px;background:#1E8449;color:#fff;font-style:normal;font-size:10px;font-weight:700;border-radius:3px;padding:0 4px;line-height:15px}
+.cthumb{position:relative}
+.ci.xl .cthumb{box-shadow:0 0 0 3px #1E8449}
+.cell .xlc{position:absolute;right:2px;top:2px;background:#1E8449;color:#fff;font-style:normal;font-size:9px;font-weight:700;border-radius:3px;padding:0 3px;line-height:13px}
+.xlchk{color:#1B6B3A;font-weight:700}
+.xlbtn{border-color:#1E8449;color:#1B6B3A}
+.xo-row{display:grid;grid-template-columns:64px 96px 1fr auto;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--deck)}
+.xo-no{font-weight:700;color:var(--hull);font-size:18px;text-align:center;line-height:1.1}
+.xo-no small{display:block;font-size:10px;font-weight:400;color:var(--steel)}
+.xo-row img{width:96px;height:72px;object-fit:contain;background:var(--deck);border-radius:4px}
+.xo-txt{display:flex;flex-direction:column;gap:1px;min-width:0;font-size:13px}
+.xo-txt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xo-btns{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.xo-btns button{padding:6px 10px}
+.xlgo{background:#1E8449;border-color:#1E8449;color:#fff}
+@media (max-width:820px){.xo-row{grid-template-columns:44px 72px 1fr;}.xo-row img{width:72px;height:54px}.xo-btns{grid-column:1 / -1;grid-template-columns:repeat(4,1fr)}}
 .tag.fl{background:#FBEAE4;color:var(--rust)}
 .th .nc{position:absolute;right:0;bottom:0;background:var(--rust);color:#fff;font-size:9px;padding:0 3px}
 #pvFlags .tag{margin-left:4px}
@@ -222,6 +239,7 @@ table.mx{border-collapse:separate;border-spacing:0}
 #cam{position:fixed;top:0;left:0;right:0;bottom:0;height:100vh;height:100dvh;background:#000;z-index:80;color:#fff}
 .camstage{position:absolute;inset:0}
 .camstage video,.camstage img{width:100%;height:100%;object-fit:contain;display:block;position:absolute;inset:0;background:#000}
+.camguide{position:absolute;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 0 9999px rgba(0,0,0,.45);pointer-events:none;border-radius:2px}
 .camfb{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;color:#C9D3DC;padding:0 24px;line-height:1.6}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s}
 .flash.on{opacity:.8;transition:none}
@@ -326,7 +344,7 @@ body.view-visits #matrixPane,body.view-visits #trayPane{display:none}
 .vstats{font-size:12px;color:var(--steel)}
 .vflags{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
 .tag.ok{background:#E3F1E6;color:#2E7D32}
-.vact{display:flex;align-items:center;padding:0 10px;border-left:1px solid var(--deck)}
+.vact{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 10px;border-left:1px solid var(--deck)}
 .vact button{padding:6px 10px;font-size:13px}
 
 @media (max-width:820px){
@@ -403,6 +421,8 @@ body.view-visits #matrixPane,body.view-visits #trayPane{display:none}
     <button role="menuitem" data-act="equip">Equipment 管理</button>
     <button role="menuitem" data-act="search">検索・比較</button>
     <button role="menuitem" data-act="sync">クラウド同期（Supabase）</button>
+    <button role="menuitem" data-act="xlalbum">Excel Photo Album</button>
+    <button role="menuitem" data-act="xlorder">Excel出力の並べ替え</button>
     <button role="menuitem" data-act="export">写真を出力（ZIP・場所別フォルダ）</button>
     <button role="menuitem" data-act="backup">バックアップ（書き出し・読み込み）</button>
   </div>
@@ -435,6 +455,7 @@ body.view-visits #matrixPane,body.view-visits #trayPane{display:none}
   <div class="camstage">
     <video id="camVideo" playsinline muted autoplay></video>
     <img id="camShot" alt="撮影した写真" hidden>
+    <div class="camguide" id="camGuide" hidden></div>
     <div class="camfb" id="camFb" hidden><p style="margin:0 0 8px">この画面ではアプリ内カメラが使えないため、iPhone標準のカメラで撮影します。<br>（標準カメラは1枚ごとに「写真を使用」の確認が出ます）</p><p class="hint" id="camErr" style="color:#9FB0BF;margin:0 0 12px"></p><button data-c="retry" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.4)">アプリ内カメラを再試行</button></div>
     <div class="flash" id="camFlash"></div>
   </div>
@@ -452,7 +473,7 @@ body.view-visits #matrixPane,body.view-visits #trayPane{display:none}
     <div class="csloc">場所：<b id="csLoc"></b><button data-c="loc">変更</button></div>
     <div class="ichips" id="csItems"></div>
     <textarea id="camCom" rows="2" placeholder="コメント"></textarea>
-    <label class="chk"><input type="checkbox" id="csMajor">Major Finding</label>
+    <div style="display:flex;gap:16px;flex-wrap:wrap"><label class="chk"><input type="checkbox" id="csMajor">Major Finding</label><label class="chk xlchk"><input type="checkbox" id="csExcel">Excel出力に使う</label></div>
     <div class="chips" id="camChips"></div>
     <div class="camrow"><button class="primary big" data-c="save">保存して次を撮る</button></div>
     <div class="camrow"><button data-c="savenc">コメントなしで次を撮る</button><button data-c="saveexit">保存して終了</button></div>
@@ -754,6 +775,7 @@ const ALIASES = {
   'FO Storage Tank': ['fost'], 'DO Storage Tank': ['dost'], 'Sludge Tank': ['sludge'], 'Sewage Holding Tank': ['sht'], 'Shaft Tunnel': ['st'], 'Pipe Tunnel': ['pt']
 };
 const ITEMS = [
+  ['observation', 'Observation', 'Obser.', 'Obser.'],
   ['general-condition', 'General Condition', 'General', '全般状態'],
   ['corrosion-rust', 'Corrosion / Rust', 'Corrosion', '腐食・錆'],
   ['coating-paint', 'Coating / Paint', 'Paint', '塗装'],
@@ -1025,6 +1047,19 @@ function shrinkCanvas(src, max) {
   c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
   return c;
 }
+/* アプリで撮影した写真：横長は 4:3、縦長は 3:4 に中央で切り出して縮小 */
+function shrinkCrop(src, max) {
+  const [w, h] = dimsOf(src);
+  const r = w >= h ? 4 / 3 : 3 / 4;
+  let sw = w, sh = h, sx = 0, sy = 0;
+  if (w / h > r) { sw = Math.round(h * r); sx = Math.round((w - sw) / 2); }
+  else { sh = Math.round(w / r); sy = Math.round((h - sh) / 2); }
+  const k = Math.min(1, max / Math.max(sw, sh));
+  const c = document.createElement('canvas');
+  c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+  c.getContext('2d').drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c;
+}
 const canvasBlob = (c, q = 0.85) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('encode')), 'image/jpeg', q));
 
 function drawRotated(ctx, img, rot, W, H) {
@@ -1123,14 +1158,14 @@ const PHOTO_SIZES = {
 async function storePhoto(visitId, src, meta) {
   const sz = PHOTO_SIZES[meta.size] || PHOTO_SIZES.std;
   const bmp = await decode(src);
-  const work = shrinkCanvas(bmp, sz.max);
+  const work = meta.crop43 ? shrinkCrop(bmp, sz.max) : shrinkCanvas(bmp, sz.max);
   bmp.close?.();
   const id = uid();
   await Store.putBlob(id + ':f', await canvasBlob(work, sz.q));
   await Store.putBlob(id + ':t', await canvasBlob(renderEdited(work, meta.edit, 360), 0.72));
   const ph = {
     id, visitId, name: meta.name, takenAt: meta.takenAt, loc: meta.loc || null, items: meta.items || [],
-    comment: meta.comment || '', commentEn: '', edit: meta.edit || newEdit(), major: !!meta.major, equipId: null, links: [],
+    comment: meta.comment || '', commentEn: '', edit: meta.edit || newEdit(), major: !!meta.major, excel: !!meta.excel, equipId: null, links: [],
     size: PHOTO_SIZES[meta.size] ? meta.size : 'std', width: work.width, height: work.height,
     createdBy: (Sync.user && Sync.user.email) || '', addedAt: Date.now()
   };
@@ -1232,7 +1267,7 @@ function renderMatrix() {
     h += `<tr><th><button class="hbtn" data-act="rowlist" data-l="${l.id}"><span class="ln">${esc(l.name)}</span>${attrBadges(l)}${rc ? `<span class="rowcount">${rc}</span>` : ''}${tab.id === 'ALL' ? `<small class="lc">${esc(catName(l.cat))}</small>` : ''}</button></th>`;
     for (const c of cols) {
       const arr = map.get(l.id + '|' + c.id) || [];
-      h += `<td><button class="cell" data-act="cell" data-l="${l.id}" data-i="${c.id}" aria-label="${esc(l.name)} ${esc(c.en)} ${arr.length}枚">${arr.length ? `<img data-thumb="${arr[arr.length - 1].id}" alt=""><span class="cnt">${arr.length}</span>${arr.some(needsComment) ? '<i class="dot" title="未コメントあり"></i>' : ''}` : ''}</button></td>`;
+      h += `<td><button class="cell" data-act="cell" data-l="${l.id}" data-i="${c.id}" aria-label="${esc(l.name)} ${esc(c.en)} ${arr.length}枚">${arr.length ? `<img data-thumb="${arr[arr.length - 1].id}" alt=""><span class="cnt">${arr.length}</span>${arr.some(needsComment) ? '<i class="dot" title="未コメントあり"></i>' : ''}${arr.some(p => p.excel) ? `<i class="xlc" title="Excel出力に使う写真 ${arr.filter(p => p.excel).length}枚">X${arr.filter(p => p.excel).length}</i>` : ''}` : ''}</button></td>`;
     }
     h += '</tr>';
   }
@@ -1256,7 +1291,7 @@ function groupsOf(list) {
 }
 function thumbHTML(ph) {
   const on = S.selected.has(ph.id);
-  return `<div class="th ${on ? 'on' : ''}" role="button" tabindex="0" aria-pressed="${on}" data-act="toggle" data-id="${ph.id}"><img data-thumb="${ph.id}" alt="${esc(ph.name)}"><span class="t">${fmtTime(ph.takenAt)}</span>${needsComment(ph) ? '<span class="nc">未コメ</span>' : ''}<button class="zoom" data-act="view" data-id="${ph.id}" aria-label="拡大表示">⤢</button></div>`;
+  return `<div class="th ${on ? 'on' : ''}" role="button" tabindex="0" aria-pressed="${on}" data-act="toggle" data-id="${ph.id}"><img data-thumb="${ph.id}" alt="${esc(ph.name)}"><span class="t">${fmtTime(ph.takenAt)}</span>${needsComment(ph) ? '<span class="nc">未コメ</span>' : ''}${ph.excel ? '<i class="xlmark">Excel</i>' : ''}<button class="zoom" data-act="view" data-id="${ph.id}" aria-label="拡大表示">⤢</button></div>`;
 }
 function renderTray() {
   const un = unassigned(), box = $('#tray');
@@ -1306,9 +1341,9 @@ async function renderVisits() {
         <span class="vthumb">${cover ? `<img data-thumb="${cover.id}" alt="">` : '<span>No photo</span>'}</span>
         <span class="vinfo"><b>${esc(v.vesselName)}</b><span class="vdate">${esc(v.date)}${v.port ? '　' + esc(v.port) : ''}</span>
           <span class="vstats">写真 ${ps.length}枚${ps.length ? `・${nLoc}か所` : ''}${range ? `・${range}` : ''}</span>
-          <span class="vflags">${un ? `<span class="tag fl">未分類 ${un}</span>` : ''}${nc ? `<span class="tag fl">未コメント ${nc}</span>` : ''}${mj ? `<span class="tag ex">Major ${mj}</span>` : ''}${ps.length && !un && !nc ? '<span class="tag ok">入力完了</span>' : ''}${S.visit && S.visit.id === v.id ? '<span class="tag">表示中</span>' : ''}</span></span>
+          <span class="vflags">${un ? `<span class="tag fl">未分類 ${un}</span>` : ''}${nc ? `<span class="tag fl">未コメント ${nc}</span>` : ''}${mj ? `<span class="tag ex">Major ${mj}</span>` : ''}${ps.some(p => p.excel) ? `<span class="tag xl">Excel ${ps.filter(p => p.excel).length}</span>` : ''}${ps.length && !un && !nc ? '<span class="tag ok">入力完了</span>' : ''}${S.visit && S.visit.id === v.id ? '<span class="tag">表示中</span>' : ''}</span></span>
       </button>
-      <div class="vact"><button data-act="exportVisit" data-id="${v.id}" ${ps.length ? '' : 'disabled'}>出力</button></div>
+      <div class="vact"><button class="xlbtn" data-act="xlVisit" data-id="${v.id}" ${ps.some(p => p.excel) ? '' : 'disabled'} title="Excel Photo Album">Excel</button><button data-act="exportVisit" data-id="${v.id}" ${ps.length ? '' : 'disabled'}>出力</button></div>
     </div>`;
   }).join('');
   hydrate(box);
@@ -1611,13 +1646,15 @@ function openNewVisit() {
     title: '新規訪船',
     body: `<label class="field"><span>Vessel</span><select id="nVessel">${S.vessels.map(v => `<option value="${v.id}" ${S.vessel?.id === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select></label>
       <label class="field"><span>Visit Date</span><input id="nDate" type="date" value="${todayStr()}"></label>
-      <label class="field"><span>Port</span><input id="nPort" placeholder="例: Kashima" list="portList"><datalist id="portList">${[...new Set(S.visits.map(v => v.port).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('')}</datalist></label>`,
+      <label class="field"><span>Visit Date（終了・複数日の場合）</span><input id="nDateEnd" type="date"></label>
+      <label class="field"><span>Port</span><input id="nPort" placeholder="例: Kashima" list="portList"><datalist id="portList">${[...new Set(S.visits.map(v => v.port).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('')}</datalist></label>
+      <label class="field"><span>Country（国名）</span><input id="nCountry" list="ctyList" placeholder="例: JAPAN"><datalist id="ctyList">${['JAPAN','KOREA','CHINA','TAIWAN','PHILIPPINES','VIETNAM','THAILAND','INDONESIA','MALAYSIA','SINGAPORE','RUSSIA'].map(c => `<option value="${c}">`).join('')}</datalist></label>`,
     footer: `<span class="sp"></span><button data-act="close">キャンセル</button><button class="primary" data-m="create">作成</button>`
   });
   dlg.addEventListener('click', async e => {
     if (!e.target.closest('[data-m="create"]')) return;
     const vs = S.vessels.find(x => x.id === dlg.querySelector('#nVessel').value);
-    const v = { id: uid(), locVer: LOC_VER, tplVer: TPL_VER, vesselId: vs.id, vesselName: vs.name, date: dlg.querySelector('#nDate').value || todayStr(), port: dlg.querySelector('#nPort').value.trim(), cats: clone(vs.cats), locations: clone(vesselLocs(vs)), createdAt: Date.now() };
+    const v = { id: uid(), locVer: LOC_VER, tplVer: TPL_VER, vesselId: vs.id, vesselName: vs.name, date: dlg.querySelector('#nDate').value || todayStr(), port: dlg.querySelector('#nPort').value.trim(), country: dlg.querySelector('#nCountry').value.trim(), dateEnd: dlg.querySelector('#nDateEnd').value || '', cats: clone(vs.cats), locations: clone(vesselLocs(vs)), createdAt: Date.now() };
     await Store.putVisit(v);
     S.visits.push(v);
     closeModal();
@@ -1631,8 +1668,10 @@ function openVisitInfo() {
   const dlg = openModal({
     title: '訪船情報',
     body: `<label class="field"><span>Vessel</span><input value="${esc(v.vesselName)}" disabled></label>
-      <label class="field"><span>Visit Date</span><input id="iDate" type="date" value="${esc(v.date)}"></label>
-      <label class="field"><span>Port</span><input id="iPort" value="${esc(v.port)}"></label>
+      <div class="grid2"><label class="field"><span>Visit Date（開始）</span><input id="iDate" type="date" value="${esc(v.date)}"></label>
+      <label class="field"><span>Visit Date（終了）</span><input id="iDateEnd" type="date" value="${esc(v.dateEnd || '')}"></label></div>
+      <div class="grid2"><label class="field"><span>Port</span><input id="iPort" value="${esc(v.port)}"></label>
+      <label class="field"><span>Country（国名）</span><input id="iCountry" list="ctyList2" value="${esc(v.country || '')}" placeholder="例: JAPAN"><datalist id="ctyList2">${['JAPAN','KOREA','CHINA','TAIWAN','PHILIPPINES','VIETNAM','THAILAND','INDONESIA','MALAYSIA','SINGAPORE','RUSSIA'].map(c => `<option value="${c}">`).join('')}</datalist></label></div>
       <p class="hint">写真 ${S.photos.length}枚・場所 ${S.locs.length}か所</p>
       <p><button data-m="reloc">船マスタの場所構成を再読み込み</button></p>
       <p class="hint" style="margin-top:0">訪船作成後に船マスタで変更した場所（追加・名称・並び順）を、この訪船にも反映します。写真はそのままです。</p>`,
@@ -1648,6 +1687,7 @@ function openVisitInfo() {
       toast(added ? `場所を ${added}か所追加しました` : '場所構成を更新しました');
     } else if (b.dataset.m === 'save') {
       v.date = dlg.querySelector('#iDate').value || v.date; v.port = dlg.querySelector('#iPort').value.trim();
+      v.country = dlg.querySelector('#iCountry').value.trim(); v.dateEnd = dlg.querySelector('#iDateEnd').value || '';
       await Store.putVisit(v); closeModal(); render(); toast('訪船情報を保存しました');
     } else if (b.dataset.m === 'del') {
       if (!confirm(`「${visitLabel(v)}」と写真${S.photos.length}枚を削除します。元に戻せません。削除しますか？`)) return;
@@ -1734,13 +1774,14 @@ function openPhotoList({ title, getList, itemId = null, reopen, showLoc = false,
   const sel = new Set();
   const dlg = openModal({
     title: `${title}（${arr.length}枚）`, wide: true,
-    body: `<div class="cgrid">${arr.map(ph => `<div class="ci"><button class="cthumb" data-m="open" data-id="${ph.id}" aria-label="${esc(nums.get(ph.id))}を開く"><img data-thumb="${ph.id}" alt=""></button><label><input type="checkbox" data-id="${ph.id}">${esc(nums.get(ph.id)?.split('-').pop())}　${fmtTime(ph.takenAt)}${needsComment(ph) ? '<span class="tag fl">未コメント</span>' : ''}${ph.edit?.shapes?.length ? '<span class="tag">書き込み</span>' : ''}${ph.major ? '<span class="tag ex">Major</span>' : ''}${ph.size === 'detail' ? '<span class="tag">Detail</span>' : ''}</label>${showLoc ? `<div class="hint">${esc(S.locMap.get(ph.loc)?.name || '')}</div>` : ''}${showItems ? `<div class="citems">${ph.items.length ? ph.items.map(i => `<span class="tag">${esc(itemName(i))}</span>`).join('') : '<span class="hint">項目なし</span>'}</div>` : ''}${eqById(ph.equipId) ? `<div class="hint">${esc(eqLabel(eqById(ph.equipId)))}</div>` : ''}</div>`).join('')}</div>`,
-    footer: `<span class="hint" id="cSel">写真を選ぶと移動できます</span><span class="sp"></span>${itemId ? '<button data-m="unitem" disabled>この項目から外す</button>' : ''}<button data-m="back" disabled>未振り分けに戻す</button><button class="primary" data-m="move" disabled>別の場所へ移動</button>`
+    body: `<div class="cgrid">${arr.map(ph => `<div class="ci ${ph.excel ? 'xl' : ''}"><button class="cthumb" data-m="open" data-id="${ph.id}" aria-label="${esc(nums.get(ph.id))}を開く"><img data-thumb="${ph.id}" alt="">${ph.excel ? '<i class="xlmark">Excel</i>' : ''}</button><label><input type="checkbox" data-id="${ph.id}">${esc(nums.get(ph.id)?.split('-').pop())}　${fmtTime(ph.takenAt)}${needsComment(ph) ? '<span class="tag fl">未コメント</span>' : ''}${ph.edit?.shapes?.length ? '<span class="tag">書き込み</span>' : ''}${ph.major ? '<span class="tag ex">Major</span>' : ''}${ph.size === 'detail' ? '<span class="tag">Detail</span>' : ''}</label>${showLoc ? `<div class="hint">${esc(S.locMap.get(ph.loc)?.name || '')}</div>` : ''}${showItems ? `<div class="citems">${ph.items.length ? ph.items.map(i => `<span class="tag">${esc(itemName(i))}</span>`).join('') : '<span class="hint">項目なし</span>'}</div>` : ''}${eqById(ph.equipId) ? `<div class="hint">${esc(eqLabel(eqById(ph.equipId)))}</div>` : ''}</div>`).join('')}</div>`,
+    footer: `<button data-m="selall" data-keep="1">全選択</button><span class="hint" id="cSel">写真を選ぶと操作できます</span><span class="sp"></span><button class="xlbtn" data-m="xlon" disabled>Excelに使う</button><button data-m="xloff" disabled>Excelに使わない</button>${itemId ? '<button data-m="unitem" disabled>この項目から外す</button>' : ''}<button data-m="back" disabled>未振り分けに戻す</button><button class="primary" data-m="move" disabled>別の場所へ移動</button>`
   });
   hydrate(dlg);
   const upd = () => {
-    dlg.querySelector('#cSel').textContent = sel.size ? `${sel.size}枚選択中` : '写真を選ぶと移動できます';
-    dlg.querySelectorAll('footer button[data-m]').forEach(b => b.disabled = !sel.size);
+    dlg.querySelector('#cSel').textContent = sel.size ? `${sel.size}枚選択中` : '写真を選ぶと操作できます';
+    dlg.querySelectorAll('footer button[data-m]:not([data-keep])').forEach(b => b.disabled = !sel.size);
+    dlg.querySelector('[data-m="selall"]').textContent = sel.size === arr.length ? '選択解除' : '全選択';
   };
   dlg.addEventListener('change', e => { const id = e.target.dataset.id; if (id) { e.target.checked ? sel.add(id) : sel.delete(id); upd(); } });
   dlg.addEventListener('click', async e => {
@@ -1751,7 +1792,19 @@ function openPhotoList({ title, getList, itemId = null, reopen, showLoc = false,
       openViewer(arr.map(x => x.id), b.dataset.id, () => { if (getList().length) reopen(); });
       return;
     }
-    const phs = [...sel].map(id => S.photos.find(x => x.id === id));
+    if (m === 'selall') {
+      const all = sel.size !== arr.length;
+      dlg.querySelectorAll('.ci input[data-id]').forEach(cb => { cb.checked = all; all ? sel.add(cb.dataset.id) : sel.delete(cb.dataset.id); });
+      upd(); return;
+    }
+    const phs = [...sel].map(id => S.photos.find(x => x.id === id)).filter(Boolean);
+    if (m === 'xlon' || m === 'xloff') {
+      const on = m === 'xlon';
+      for (const ph of phs) if (!!ph.excel !== on) { ph.excel = on; await Store.putPhoto(ph); }
+      closeModal(); render(); reopen();
+      toast(`${phs.length}枚を「Excelに${on ? '使う' : '使わない'}」にしました`);
+      return;
+    }
     if (m === 'back') { for (const ph of phs) { ph.loc = null; ph.items = []; await Store.putPhoto(ph); } closeModal(); render(); toast(`${phs.length}枚を未振り分けに戻しました`); }
     else if (m === 'unitem') { for (const ph of phs) { ph.items = ph.items.filter(x => x !== itemId); await Store.putPhoto(ph); } closeModal(); render(); toast(`${phs.length}枚から ${itemName(itemId)} を外しました`); }
     else if (m === 'move') { closeModal(); openAssign([...sel]); }
@@ -1783,7 +1836,7 @@ function openViewer(ids, startId, back, opts = {}) {
         <p class="hint" style="margin:0 0 6px">場所はこの写真の場所で登録されます。詳細は「メニュー → Equipment 管理」で編集できます。</p><p style="display:flex;gap:6px;margin:0"><span class="sp"></span><button data-m="eqcancel">キャンセル</button><button class="primary" data-m="eqsave">登録</button></p></div></div>
       <label class="field"><span>コメント</span><textarea id="pvCom" rows="4" placeholder="指摘内容、対応予定など"></textarea></label>
       <details class="field" id="pvEnBox"><summary class="hint">英文コメント（任意）</summary><textarea id="pvComEn" rows="3" placeholder="Remarks in English" style="margin-top:6px"></textarea></details>
-      <p style="display:flex;gap:16px;flex-wrap:wrap"><label class="chk"><input type="checkbox" id="pvMajor">Major Finding</label></p>
+      <p style="display:flex;gap:16px;flex-wrap:wrap"><label class="chk xlchk"><input type="checkbox" id="pvExcel">Excel出力に使う</label><label class="chk"><input type="checkbox" id="pvMajor">Major Finding</label></p>
       <p style="display:flex;gap:6px;flex-wrap:wrap"><button data-m="history">履歴・Before/After 比較</button><span class="sp"></span><button class="danger" data-m="delete">この写真を削除</button></p></div></div>`
   });
   document.addEventListener('keydown', onKey);
@@ -1825,6 +1878,7 @@ function openViewer(ids, startId, back, opts = {}) {
     dlg.querySelector('#pvComEn').value = ph.commentEn || '';
     dlg.querySelector('#pvEnBox').open = !!ph.commentEn;
     dlg.querySelector('#pvMajor').checked = !!ph.major;
+    dlg.querySelector('#pvExcel').checked = !!ph.excel;
     dlg.querySelector('#pvEqNew').hidden = true;
     dlg.querySelector('[data-m="prev"]').disabled = idx === 0;
     const last = idx >= ids.length - 1;
@@ -1844,6 +1898,7 @@ function openViewer(ids, startId, back, opts = {}) {
 
   com.addEventListener('input', () => { ph.comment = com.value; markDirty(); dlg.querySelector('#pvFlags').innerHTML = flagTags(ph); });
   dlg.querySelector('#pvMajor').addEventListener('change', e => { ph.major = e.target.checked; markDirty(); });
+  dlg.querySelector('#pvExcel').addEventListener('change', e => { ph.excel = e.target.checked; markDirty(); });
   dlg.querySelector('#pvComEn').addEventListener('input', e => { ph.commentEn = e.target.value; markDirty(); });
   const eqq = dlg.querySelector('#pvEqQ'), eql = dlg.querySelector('#pvEqList');
   function eqText() { const e = ph && eqById(ph.equipId); return e ? eqLabel(e) : ''; }
@@ -2167,6 +2222,7 @@ async function startStream() {
     const v = $('#camVideo');
     v.setAttribute('playsinline', ''); v.muted = true;
     v.srcObject = Cam.stream;
+    v.onloadedmetadata = v.onresize = () => camGuide();
     try { await v.play(); } catch (e) { /* 自動再生はタップ後に再開 */ }
   } catch (e) {
     Cam.fallback = true;
@@ -2175,10 +2231,25 @@ async function startStream() {
     $('#camFb').hidden = false;
   }
 }
+/* 撮影画面に 4:3（縦持ちは 3:4）の保存範囲を表示 */
+function camGuide() {
+  const v = $('#camVideo'), g = $('#camGuide');
+  if (!v || !g) return;
+  const vw = v.videoWidth, vh = v.videoHeight;
+  if (!vw || !vh || Cam.fallback || $('#cam').hidden) { g.hidden = true; return; }
+  const bw = v.clientWidth, bh = v.clientHeight;
+  const k = Math.min(bw / vw, bh / vh), dw = vw * k, dh = vh * k;
+  const r = vw >= vh ? 4 / 3 : 3 / 4;
+  let gw = dw, gh = dh;
+  if (dw / dh > r) gw = dh * r; else gh = dw / r;
+  Object.assign(g.style, { width: gw + 'px', height: gh + 'px', left: (bw - gw) / 2 + 'px', top: (bh - gh) / 2 + 'px' });
+  g.hidden = false;
+}
 function stopCam() {
   Cam.stream?.getTracks().forEach(t => t.stop());
   Cam.stream = null; Cam.track = null;
   $('#camVideo').srcObject = null;
+  $('#camGuide').hidden = true;
 }
 function burstUI() {
   const b = $('#camBurst');
@@ -2195,7 +2266,7 @@ function quickSave(blob, takenAt) {
   const d = new Date(takenAt);
   const meta = {
     name: `IMG_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}_${String(d.getMilliseconds()).padStart(3, '0')}.jpg`,
-    takenAt, comment: '', loc: Cam.loc || null, items: [], edit: newEdit(), major: false, size: Cam.size
+    takenAt, comment: '', loc: Cam.loc || null, items: [], edit: newEdit(), major: false, size: Cam.size, crop43: true
   };
   const vid = S.visit.id;
   Cam.pending++; pendUI();
@@ -2237,10 +2308,19 @@ async function snapPhoto() {
   const blob = await grabFrame();
   if (blob) showSheet(blob, Date.now());
 }
+async function prepWork() {
+  const blob = Cam.blob;
+  const bmp = await decode(blob);
+  const w = shrinkCrop(bmp, (PHOTO_SIZES[Cam.size] || PHOTO_SIZES.std).max);
+  bmp.close?.();
+  if (Cam.blob === blob) Cam.work = w;
+}
 async function updateShot() {
   if (Cam.url) URL.revokeObjectURL(Cam.url);
-  let b = Cam.blob;
-  if (Cam.edit && Cam.work) b = await canvasBlob(renderEdited(Cam.work, Cam.edit, 1600), 0.85);
+  const blob = Cam.blob;
+  if (!Cam.work) { try { await prepWork(); } catch (e) { /* 表示用の切り出しに失敗しても保存は可能 */ } }
+  if (Cam.blob !== blob) return;
+  const b = Cam.work ? await canvasBlob(renderEdited(Cam.work, Cam.edit || newEdit(), 1600), 0.85) : blob;
   Cam.url = URL.createObjectURL(b);
   $('#camShot').src = Cam.url;
   $('#csPen').textContent = Cam.edit?.shapes?.length || Cam.edit?.crop || Cam.edit?.rot ? 'ペンで書き込む（編集済み）' : 'ペンで書き込む';
@@ -2252,8 +2332,10 @@ function showSheet(blob, takenAt) {
   $('#camFb').hidden = true;
   $('#camCom').value = '';
   $('#csMajor').checked = false;
+  $('#csExcel').checked = false;
   $('#csItems').innerHTML = itemChips([]);
   $('#camBar').hidden = true;
+  $('#camGuide').hidden = true;
   $('#camSheet').hidden = false;
   $('#camSheet').scrollTop = 0;
   fitShot();
@@ -2271,6 +2353,7 @@ function hideSheet() {
   $('#camBar').hidden = false;
   $('#camShot').hidden = true;
   fitShot();
+  camGuide();
   $('#camCom').blur();
   if (Cam.fallback) $('#camFb').hidden = false;
 }
@@ -2286,7 +2369,8 @@ async function camSave({ withComment = true, next = true } = {}) {
     items: readChips($('#csItems')),
     edit: Cam.edit || newEdit(),
     major: $('#csMajor').checked,
-    size: Cam.size
+    excel: $('#csExcel').checked,
+    size: Cam.size, crop43: true
   };
   hideSheet();
   if (!next) exitCam(true);
@@ -2334,7 +2418,7 @@ function bindCam() {
       case 'lpnone': Cam.loc = ''; camLocLabel(); $('#camLp').hidden = true; break;
       case 'pen': {
         if (!Cam.blob) return;
-        if (!Cam.work) { const bmp = await decode(Cam.blob); Cam.work = shrinkCanvas(bmp, (PHOTO_SIZES[Cam.size] || PHOTO_SIZES.std).max); bmp.close?.(); }
+        if (!Cam.work) await prepWork();
         openPhotoEditor(Cam.work, Cam.edit, ed => { Cam.edit = ed; updateShot(); });
         break;
       }
@@ -2345,7 +2429,7 @@ function bindCam() {
       }
     }
   });
-  window.addEventListener('resize', () => { if (!$('#cam').hidden) fitShot(); });
+  window.addEventListener('resize', () => { if (!$('#cam').hidden) { fitShot(); camGuide(); } });
   $('#capIn').addEventListener('change', async e => {
     const f = e.target.files[0]; e.target.value = '';
     if (!f) return;
@@ -2843,7 +2927,7 @@ async function exportPhotosZip(root, { edits, withUn }) {
     .sort((a, b) => { const ka = key(a), kb = key(b); return ka[0] - kb[0] || ka[1] - kb[1] || a.takenAt - b.takenAt; });
   if (!list.length) { toast('出力する写真がありません'); return; }
   const nums = photoNumbers(), counters = new Map(), files = [], used = new Set();
-  const rows = [['File', 'Category', 'Location', 'Items', 'Comment', 'Comment (EN)', 'Equipment', 'Major', 'Photo No.', 'Taken', 'Size']];
+  const rows = [['File', 'Category', 'Location', 'Items', 'Comment', 'Comment (EN)', 'Equipment', 'Major', 'Excel', 'Photo No.', 'Taken', 'Size']];
   const prog = $('#progress');
   prog.hidden = false;
   try {
@@ -2867,7 +2951,7 @@ async function exportPhotosZip(root, { edits, withUn }) {
       files.push({ name: path, blob });
       const eq = eqById(p.equipId);
       rows.push([path.slice(root.length + 1), l ? catName(l.cat) : '', l ? l.name : '未分類', p.items.map(itemName).join(' / '), p.comment || '', p.commentEn || '',
-        eq ? eqLabel(eq) : '', p.major ? 'Yes' : '', nums.get(p.id) || '', fmtFull(p.takenAt), (PHOTO_SIZES[p.size] || PHOTO_SIZES.std).label]);
+        eq ? eqLabel(eq) : '', p.major ? 'Yes' : '', p.excel ? 'Yes' : '', nums.get(p.id) || '', fmtFull(p.takenAt), (PHOTO_SIZES[p.size] || PHOTO_SIZES.std).label]);
     }
     files.push({ name: `${root}/photo_list.csv`, blob: new Blob(['\uFEFF' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv' }) });
     $('#pText').textContent = 'ZIPファイルを作成中';
@@ -2881,6 +2965,428 @@ async function exportPhotosZip(root, { edits, withUn }) {
     prog.hidden = true;
     alert('出力できませんでした。写真の枚数が多い場合は、未分類を除くなどして再度お試しください。');
   }
+}
+
+/* ================= Excel Photo Album =================
+   テンプレート（templates/SMD-007-R0-Photo-Album-Template.xlsx）の xlsx を直接編集し、
+   写真・Location / Item・Comment・タイトル・印刷範囲だけを書き換える（書式・印刷設定は維持） */
+const XL = {
+  template: 'templates/SMD-007-R0-Photo-Album-Template.xlsx',
+  ver: '1',
+  sheet: 'Photo Album',
+  imgMax: { std: 1500, detail: 2200 }, imgQ: 0.8,
+  mdw: 8,          // 既定フォント Calibri 12pt の最大数字幅（px）
+  pad: 4,          // 写真枠内の余白（px）
+  busy: false
+};
+const EMU_PX = 9525, EMU_PT = 12700;
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'));
+function enDateRange(a, b) {
+  const p = x => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(x || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; };
+  let s1 = p(a), s2 = p(b);
+  if (!s1 && s2) { s1 = s2; s2 = null; }
+  if (!s1) return '';
+  if (s2 && (s2.y * 10000 + s2.m * 100 + s2.d) < (s1.y * 10000 + s1.m * 100 + s1.d)) [s1, s2] = [s2, s1];
+  const f = (x, withM, withY) => `${ordinal(x.d)}${withM ? ' ' + MONTHS_EN[x.m - 1] : ''}${withY ? ', ' + x.y : ''}`;
+  if (!s2 || (s1.y === s2.y && s1.m === s2.m && s1.d === s2.d)) return f(s1, true, true);
+  if (s1.y !== s2.y) return `${f(s1, true, true)} - ${f(s2, true, true)}`;
+  if (s1.m !== s2.m) return `${f(s1, true, false)} - ${f(s2, true, true)}`;
+  return `${ordinal(s1.d)} - ${f(s2, true, true)}`;
+}
+function xlTitle(v) {
+  const place = [v.port, v.country].map(x => (x || '').trim()).filter(Boolean).join(', ');
+  const head = [(v.vesselName || '').trim(), place].filter(Boolean).join(' - ');
+  return [head, enDateRange(v.date, v.dateEnd)].filter(Boolean).join(' / ');
+}
+function xlFileName(v) {
+  const name = (v.vesselName || '').trim(), d = (v.date || '').replace(/-/g, '');
+  const f = [name, 'Photo_Album', /^\d{8}$/.test(d) ? d : ''].filter(Boolean).join('_')
+    .replace(/[\\/:*?"<>|\s]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+  return (f || 'Photo_Album') + '.xlsx';
+}
+const fmtVisitDates = v => [v.date, v.dateEnd && v.dateEnd !== v.date ? v.dateEnd : ''].filter(Boolean).map(x => x.replace(/-/g, '/')).join(' - ');
+/* 出力対象（Excel出力に使う）の並び：保存済みの並び → 未登録の写真は標準の位置に差し込む */
+function xlDefaultOrder(list) {
+  const corder = new Map(S.cats.map((c, i) => [c.id, i])), lorder = new Map(S.locs.map((l, i) => [l.id, i]));
+  const key = p => { const l = S.locMap.get(p.loc); return l ? [corder.get(l.cat) ?? 99, lorder.get(l.id) ?? 0] : [999, 0]; };
+  return [...list].sort((a, b) => { const ka = key(a), kb = key(b); return ka[0] - kb[0] || ka[1] - kb[1] || a.takenAt - b.takenAt; });
+}
+function xlOrdered() {
+  const list = S.photos.filter(p => p.excel === true);
+  const byId = new Map(list.map(p => [p.id, p]));
+  const out = (S.visit.xlOrder || []).filter(id => byId.has(id)).map(id => byId.get(id));
+  const inOut = new Set(out.map(p => p.id));
+  const def = xlDefaultOrder(list);
+  def.forEach((p, i) => {
+    if (inOut.has(p.id)) return;
+    let pos = 0;
+    for (let k = i - 1; k >= 0; k--) { const at = out.findIndex(x => x.id === def[k].id); if (at >= 0) { pos = at + 1; break; } }
+    out.splice(pos, 0, p); inOut.add(p.id);
+  });
+  return out;
+}
+async function xlSaveOrder(ids) { S.visit.xlOrder = ids; await Store.putVisit(S.visit); }
+function xlLocItem(p) {
+  const l = S.locMap.get(p.loc), eq = eqById(p.equipId);
+  return [l ? l.name : '', eq ? eqLabel(eq) : '', (p.items || []).map(itemName).join(' / ')]
+    .filter(x => x && String(x).trim()).join('\n');
+}
+const plainText = t => String(t || '').replace(/\r\n?/g, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li)>/gi, '\n').replace(/<[^>]*>/g, '')
+  .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\n{3,}/g, '\n\n').trim();
+const xmlEsc = t => String(t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function xlMsg(title, text) {
+  openModal({ title, body: `<p style="white-space:pre-wrap;margin:0">${esc(text)}</p>`, footer: '<span class="sp"></span><button class="primary" data-act="close">OK</button>' });
+}
+class XlError extends Error {}
+
+/* ---- xlsx（zip）読み込み ---- */
+async function inflateRaw(u8) {
+  if (typeof DecompressionStream === 'undefined') throw new XlError('このブラウザはExcelテンプレートの読み込みに対応していません（iPhoneは iOS 16.4 以降が必要です）。');
+  const stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function unzip(buf) {
+  const dv = new DataView(buf), dec = new TextDecoder();
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new XlError('テンプレートがExcelファイルとして読み込めません。');
+  const n = dv.getUint16(eocd + 10, true);
+  let q = dv.getUint32(eocd + 16, true);
+  const files = new Map();
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(q, true) !== 0x02014b50) throw new XlError('テンプレートの形式が正しくありません。');
+    const method = dv.getUint16(q + 10, true), csize = dv.getUint32(q + 20, true);
+    const nlen = dv.getUint16(q + 28, true), elen = dv.getUint16(q + 30, true), clen = dv.getUint16(q + 32, true), loff = dv.getUint32(q + 42, true);
+    const name = dec.decode(new Uint8Array(buf, q + 46, nlen));
+    q += 46 + nlen + elen + clen;
+    if (name.endsWith('/')) continue;
+    const start = loff + 30 + dv.getUint16(loff + 26, true) + dv.getUint16(loff + 28, true);
+    const raw = new Uint8Array(buf, start, csize);
+    if (method === 0) files.set(name, raw.slice());
+    else if (method === 8) files.set(name, await inflateRaw(raw));
+    else throw new XlError('テンプレートの圧縮形式に対応していません。');
+  }
+  return files;
+}
+const u8text = u8 => new TextDecoder().decode(u8);
+const textU8 = t => new TextEncoder().encode(t);
+const colIdx = letters => letters.split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+
+/* ---- テンプレート解析：写真枠（スロット）を検出 ---- */
+async function xlLoadTemplate() {
+  let res;
+  try { res = await fetch(new URL(`${XL.template}?v=${XL.ver}`, document.baseURI), { cache: 'no-cache' }); }
+  catch (e) { throw new XlError('Excelテンプレートを取得できません。通信状態を確認してください。'); }
+  if (!res.ok) throw new XlError(`Excelテンプレートを取得できません（${res.status}）。templates フォルダにテンプレートがあるか確認してください。`);
+  const files = await unzip(await res.arrayBuffer());
+  const P = new DOMParser();
+  const wbXml = u8text(files.get('xl/workbook.xml') || new Uint8Array());
+  const wbDoc = P.parseFromString(wbXml, 'application/xml');
+  const sheetEl = [...wbDoc.getElementsByTagName('sheet')].find(e => (e.getAttribute('name') || '').trim() === XL.sheet);
+  if (!sheetEl) throw new XlError(`テンプレートに「${XL.sheet}」シートがありません。`);
+  const sheetIndex = [...wbDoc.getElementsByTagName('sheet')].indexOf(sheetEl);
+  const rid = sheetEl.getAttribute('r:id') || sheetEl.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+  const relDoc = P.parseFromString(u8text(files.get('xl/_rels/workbook.xml.rels')), 'application/xml');
+  const rel = [...relDoc.getElementsByTagName('Relationship')].find(r => r.getAttribute('Id') === rid);
+  if (!rel) throw new XlError(`「${XL.sheet}」シートを読み込めません。`);
+  const target = rel.getAttribute('Target').replace(/^\/?xl\//, '').replace(/^\//, '');
+  const sheetPath = 'xl/' + target;
+  const sheetXml = u8text(files.get(sheetPath));
+  const sdoc = P.parseFromString(sheetXml, 'application/xml');
+  const sst = files.has('xl/sharedStrings.xml')
+    ? [...P.parseFromString(u8text(files.get('xl/sharedStrings.xml')), 'application/xml').getElementsByTagName('si')].map(si => [...si.getElementsByTagName('t')].map(t => t.textContent).join(''))
+    : [];
+  const cellText = c => {
+    const t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0];
+    if (t === 's' && v) return sst[+v.textContent] || '';
+    if (t === 'inlineStr') return c.textContent;
+    return v ? v.textContent : '';
+  };
+  const labels = { C: { loc: [], com: [] }, H: { loc: [], com: [] } };
+  const styleOf = {};
+  for (const c of sdoc.getElementsByTagName('c')) {
+    const m = /^([A-Z]+)(\d+)$/.exec(c.getAttribute('r') || '');
+    if (!m) continue;
+    styleOf[m[0]] = c.getAttribute('s');
+    if (!labels[m[1]]) continue;
+    const txt = cellText(c).trim();
+    if (txt === 'Location / Item') labels[m[1]].loc.push(+m[2]);
+    else if (txt === 'Comment') labels[m[1]].com.push(+m[2]);
+  }
+  if (!labels.C.loc.length && !labels.H.loc.length) throw new XlError('テンプレートに「Location / Item」ラベルが見つかりません。');
+  const merges = [...sdoc.getElementsByTagName('mergeCell')].map(e => {
+    const m = /^([A-Z]+)(\d+):([A-Z]+)(\d+)$/.exec(e.getAttribute('ref') || '');
+    return m ? { c1: colIdx(m[1]), r1: +m[2], c2: colIdx(m[3]), r2: +m[4] } : null;
+  }).filter(Boolean);
+  const findPhoto = (col, row) => merges.find(m => m.c1 === col && m.c2 === col && m.r1 <= row && row <= m.r2 && m.r2 > m.r1)
+    || merges.find(m => m.c1 === col && m.r1 === row);
+  const slots = [];
+  const rows = [...new Set([...labels.C.loc, ...labels.H.loc])].sort((a, b) => a - b);
+  for (const r of rows) {
+    for (const [lab, pcol, col] of [['C', 0, 'C'], ['H', 5, 'H']]) {
+      if (!labels[lab].loc.includes(r)) continue;
+      const ph = findPhoto(pcol, r);
+      if (!ph) throw new XlError(`写真枠が見つかりません（${pcol === 0 ? 'A' : 'F'}${r} 付近）。テンプレートを確認してください。`);
+      const com = labels[lab].com.filter(x => x > r && x <= Math.max(ph.r2, r + 3)).sort((a, b) => a - b)[0] ?? r + 2;
+      slots.push({ side: pcol === 0 ? 'L' : 'R', photo: ph, locRef: `${col}${r + 1}`, comRef: `${col}${com + 1}`, bottom: Math.max(ph.r2, com + 1) });
+    }
+  }
+  // 列幅・行高さ（写真の配置計算用）
+  const fmt = sdoc.getElementsByTagName('sheetFormatPr')[0];
+  const defRow = parseFloat(fmt?.getAttribute('defaultRowHeight')) || 15;
+  const defCol = parseFloat(fmt?.getAttribute('defaultColWidth')) || 8.43;
+  const colW = {};
+  for (const c of sdoc.getElementsByTagName('col')) for (let i = +c.getAttribute('min'); i <= +c.getAttribute('max'); i++) colW[i - 1] = parseFloat(c.getAttribute('width'));
+  const rowH = {};
+  for (const r of sdoc.getElementsByTagName('row')) if (r.getAttribute('ht')) rowH[+r.getAttribute('r')] = parseFloat(r.getAttribute('ht'));
+  const breaks = [...sdoc.getElementsByTagName('rowBreaks')].flatMap(b => [...b.getElementsByTagName('brk')].map(x => +x.getAttribute('id'))).sort((a, b) => a - b);
+  return {
+    files, sheetPath, sheetXml, sheetIndex, slots, breaks, styleOf,
+    colPx: i => { const w = colW[i] ?? defCol; return Math.trunc(((256 * w + Math.trunc(128 / XL.mdw)) / 256) * XL.mdw); },
+    rowPt: r => rowH[r] ?? defRow
+  };
+}
+
+/* ---- シートのセル書き換え（該当セルだけを置換） ---- */
+function setCellText(xml, ref, text, style) {
+  const re = new RegExp(`<c r="${ref}"([^>]*?)(?:/>|>([\\s\\S]*?)</c>)`);
+  const m = xml.match(re);
+  const body = text ? `<is><t xml:space="preserve">${xmlEsc(text)}</t></is>` : '';
+  if (m) {
+    let attrs = m[1].replace(/\s+t="[^"]*"/, '');
+    if (style != null) attrs = attrs.replace(/\s+s="[^"]*"/, '') + ` s="${style}"`;
+    return xml.replace(m[0], text ? `<c r="${ref}"${attrs} t="inlineStr">${body}</c>` : `<c r="${ref}"${attrs}/>`);
+  }
+  if (!text) return xml;
+  const row = +ref.match(/\d+/)[0], col = colIdx(ref.match(/[A-Z]+/)[0]);
+  const rm = xml.match(new RegExp(`<row r="${row}"([^>]*?)(/>|>([\\s\\S]*?)</row>)`));
+  const cell = `<c r="${ref}"${style != null ? ` s="${style}"` : ''} t="inlineStr">${body}</c>`;
+  if (!rm) throw new XlError(`テンプレートの ${row} 行目が見つかりません。`);
+  let inner = rm[2] === '/>' ? '' : rm[3];
+  let pos = inner.length;
+  for (const c of inner.matchAll(/<c r="([A-Z]+)\d+"/g)) if (colIdx(c[1]) > col) { pos = c.index; break; }
+  inner = inner.slice(0, pos) + cell + inner.slice(pos);
+  return xml.replace(rm[0], `<row r="${row}"${rm[1].replace(/\s*\/$/, '')}>${inner}</row>`);
+}
+/* 既存の書式（フォント・罫線・背景）はそのままに、配置だけ変えた書式を追加 */
+function addAlignStyle(stylesXml, baseIdx, alignXml, cache) {
+  const key = `${baseIdx}|${alignXml}`;
+  if (cache[key] != null) return [stylesXml, cache[key]];
+  const m = stylesXml.match(/<cellXfs count="(\d+)">([\s\S]*?)<\/cellXfs>/);
+  if (!m) return [stylesXml, baseIdx];
+  const xfs = m[2].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g) || [];
+  const base = xfs[+baseIdx || 0];
+  if (!base) return [stylesXml, baseIdx];
+  let nx = base.replace(/<alignment\b[^>]*\/>/, '').replace(/<xf\b([^>]*?)\/>/, '<xf$1></xf>');
+  nx = nx.replace(/<xf\b([^>]*)>/, (all, a) => `<xf${/applyAlignment=/.test(a) ? a : a + ' applyAlignment="1"'}>${alignXml}`);
+  const idx = xfs.length;
+  const out = stylesXml.replace(m[0], `<cellXfs count="${idx + 1}">${m[2]}${nx}</cellXfs>`);
+  cache[key] = idx;
+  return [out, idx];
+}
+
+/* ---- 写真の配置（contain・中央） ---- */
+function anchorXml(tpl, slot, imgW, imgH, n, rid) {
+  const col = slot.photo.c1;
+  const fw = tpl.colPx(col) * EMU_PX;
+  const rowsList = [];
+  for (let r = slot.photo.r1; r <= slot.photo.r2; r++) rowsList.push([r, Math.round(tpl.rowPt(r) * EMU_PT)]);
+  const fh = rowsList.reduce((a, x) => a + x[1], 0);
+  const pad = XL.pad * EMU_PX;
+  const k = Math.min((fw - pad * 2) / imgW, (fh - pad * 2) / imgH);
+  const w = Math.round(imgW * k), h = Math.round(imgH * k);
+  const x0 = Math.round((fw - w) / 2), y0 = Math.round((fh - h) / 2);
+  const at = y => {
+    let acc = 0;
+    for (let i = 0; i < rowsList.length; i++) {
+      const [r, hh] = rowsList[i];
+      if (y < acc + hh || i === rowsList.length - 1) return { row: r - 1, off: Math.max(0, Math.min(hh, y - acc)) };
+      acc += hh;
+    }
+  };
+  const f = at(y0), t = at(y0 + h);
+  return `<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>${col}</xdr:col><xdr:colOff>${x0}</xdr:colOff><xdr:row>${f.row}</xdr:row><xdr:rowOff>${f.off}</xdr:rowOff></xdr:from>`
+    + `<xdr:to><xdr:col>${col}</xdr:col><xdr:colOff>${x0 + w}</xdr:colOff><xdr:row>${t.row}</xdr:row><xdr:rowOff>${t.off}</xdr:rowOff></xdr:to>`
+    + `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${n + 1}" name="Photo ${n}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>`
+    + `<xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>`
+    + `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${w}" cy="${h}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`;
+}
+async function xlImage(p, max) {
+  const blob = await blobForRender(p.id);
+  if (!blob) throw new Error('写真データを読み込めません');
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await loadImg(url);
+    const c = renderEdited(img, p.edit, max);
+    return { blob: await canvasBlob(c, XL.imgQ), w: c.width, h: c.height };
+  } finally { URL.revokeObjectURL(url); }
+}
+const slotName = (i, slot) => `${Math.floor(i / 2) + 1}段目${slot.side === 'L' ? '左' : '右'}`;
+async function xlBuild(tpl, list, onProgress) {
+  const files = new Map(tpl.files);
+  let sheet = tpl.sheetXml;
+  // タイトル
+  sheet = setCellText(sheet, 'C1', xlTitle(S.visit), null);
+  let styles = u8text(files.get('xl/styles.xml'));
+  const cache = {};
+  const anchors = [], rels = [];
+  for (let i = 0; i < list.length; i++) {
+    const p = list[i], slot = tpl.slots[i];
+    onProgress(i, list.length);
+    let im;
+    try { im = await xlImage(p, (XL.imgMax[p.size] || XL.imgMax.std)); }
+    catch (e) {
+      console.error('Excel image error', p.id, e);
+      const l = S.locMap.get(p.loc);
+      throw new XlError(`${i + 1}枚目の写真（${l ? l.name : '未分類'}・${fmtFull(p.takenAt)}）の画像変換に失敗しました。\n${e.message || e}`);
+    }
+    const n = i + 1;
+    files.set(`xl/media/hp_photo${n}.jpeg`, new Uint8Array(await im.blob.arrayBuffer()));
+    rels.push(`<Relationship Id="rId${n}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/hp_photo${n}.jpeg"/>`);
+    anchors.push(anchorXml(tpl, slot, im.w, im.h, n, `rId${n}`));
+    let sLoc, sCom;
+    [styles, sLoc] = addAlignStyle(styles, tpl.styleOf[slot.locRef] ?? 0, '<alignment horizontal="left" vertical="center" wrapText="1"/>', cache);
+    [styles, sCom] = addAlignStyle(styles, tpl.styleOf[slot.comRef] ?? 0, '<alignment horizontal="left" vertical="top" wrapText="1"/>', cache);
+    sheet = setCellText(sheet, slot.locRef, xlLocItem(p), sLoc);
+    sheet = setCellText(sheet, slot.comRef, plainText(p.comment), sCom);
+  }
+  files.set('xl/styles.xml', textU8(styles));
+  // 図形（写真）をシートに関連付け
+  const dPath = 'xl/drawings/hp_drawing1.xml';
+  files.set(dPath, textU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">${anchors.join('')}</xdr:wsDr>`));
+  files.set('xl/drawings/_rels/hp_drawing1.xml.rels', textU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join('')}</Relationships>`));
+  const sheetName = tpl.sheetPath.split('/').pop();
+  const sRelPath = tpl.sheetPath.replace(sheetName, `_rels/${sheetName}.rels`);
+  let sRels = files.has(sRelPath) ? u8text(files.get(sRelPath)) : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+  let drId = 'rIdHp1';
+  while (sRels.includes(`Id="${drId}"`)) drId += 'x';
+  sRels = sRels.replace('</Relationships>', `<Relationship Id="${drId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/hp_drawing1.xml"/></Relationships>`);
+  files.set(sRelPath, textU8(sRels));
+  if (/<drawing\b/.test(sheet)) throw new XlError('テンプレートに既存の図形があるため出力できません。');
+  const after = ['<legacyDrawing', '<legacyDrawingHF', '<drawingHF', '<picture', '<oleObjects', '<controls', '<webPublishItems', '<tableParts', '<extLst', '</worksheet>'];
+  const pos = Math.min(...after.map(t => sheet.indexOf(t)).filter(x => x >= 0));
+  sheet = sheet.slice(0, pos) + `<drawing r:id="${drId}"/>` + sheet.slice(pos);
+  if (!/xmlns:r=/.test(sheet.slice(0, 600))) sheet = sheet.replace('<worksheet ', '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+  files.set(tpl.sheetPath, textU8(sheet));
+  // Content Types
+  let ct = u8text(files.get('[Content_Types].xml'));
+  if (!/Extension="jpeg"/i.test(ct)) ct = ct.replace('</Types>', '<Default Extension="jpeg" ContentType="image/jpeg"/></Types>');
+  ct = ct.replace('</Types>', `<Override PartName="/${dPath}" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>`);
+  files.set('[Content_Types].xml', textU8(ct));
+  // 印刷範囲：写真を入れた最後のページまで
+  const bottom = Math.max(...tpl.slots.slice(0, list.length).map(sl => sl.bottom));
+  const pageEnd = tpl.breaks.find(b => b >= bottom) ?? bottom;
+  let wb = u8text(files.get('xl/workbook.xml'));
+  const qn = `'${XL.sheet.replace(/'/g, "''")}'`;
+  const re = new RegExp(`(<definedName name="_xlnm\\.Print_Area" localSheetId="${tpl.sheetIndex}"[^>]*>)([^<]*)(</definedName>)`);
+  if (re.test(wb)) wb = wb.replace(re, (a, o, v, c) => `${o}${v.replace(/\$[A-Z]+\$\d+\s*$/, m => m.replace(/\d+\s*$/, String(pageEnd)))}${c}`);
+  else if (/<definedNames>/.test(wb)) wb = wb.replace('<definedNames>', `<definedNames><definedName name="_xlnm.Print_Area" localSheetId="${tpl.sheetIndex}">${qn}!$A$1:$H$${pageEnd}</definedName>`);
+  files.set('xl/workbook.xml', textU8(wb));
+  onProgress(list.length, list.length);
+  return await makeZip([...files].map(([name, u8]) => ({ name, blob: new Blob([u8]) })));
+}
+
+/* ---- 画面 ---- */
+async function openXlAlbum() {
+  if (XL.busy) return;
+  const v = S.visit;
+  const list = xlOrdered();
+  if (!list.length) { xlMsg('Excel Photo Album', 'Obser.『使う』に設定された写真がありません。\n（写真ビューアまたは写真一覧で「Excel出力に使う」を選んでください）'); return; }
+  const prog = $('#progress');
+  let tpl;
+  try {
+    prog.hidden = false; $('#pText').textContent = 'テンプレートを確認中...'; $('#pBar').style.width = '10%';
+    tpl = await xlLoadTemplate();
+  } catch (e) {
+    console.error(e);
+    prog.hidden = true;
+    xlMsg('Excel Photo Album', e instanceof XlError ? e.message : 'Excelテンプレートを読み込めませんでした。');
+    return;
+  }
+  prog.hidden = true;
+  if (list.length > tpl.slots.length) { xlMsg('Excel Photo Album', `Excelテンプレートの写真枠が不足しています。出力対象を${tpl.slots.length}枚以下にしてください。`); return; }
+  const fname = xlFileName(v);
+  const dlg = openModal({
+    title: 'Excel Photo Album',
+    body: `<p style="margin-top:0">Excel Photo Albumを作成します。</p>
+      <table class="vtable"><tbody>
+        <tr><th>船名</th><td>${esc(v.vesselName || '－')}</td></tr>
+        <tr><th>訪船日</th><td>${esc(fmtVisitDates(v) || '－')}</td></tr>
+        <tr><th>出力写真</th><td>${list.length}枚（写真枠 ${tpl.slots.length}枚まで）</td></tr>
+        <tr><th>タイトル</th><td>${esc(xlTitle(v) || '－')}</td></tr>
+        <tr><th>ファイル名</th><td style="word-break:break-all">${esc(fname)}</td></tr>
+      </tbody></table>
+      <p class="hint">並び順は「Excel出力の並べ替え」の順です。${!v.country || !v.port ? '<br>港名・国名は「訪船情報」で入力できます。' : ''}</p>`,
+    footer: `<button data-m="order">並べ替え</button><span class="sp"></span><button data-act="close">キャンセル</button><button class="primary xlgo" data-m="go">Excelを作成</button>`
+  });
+  dlg.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    if (b.dataset.m === 'order') { closeModal(); openXlOrder(); return; }
+    if (XL.busy) return;
+    XL.busy = true;
+    b.disabled = true; b.textContent = 'Excelを作成中...';
+    prog.hidden = false; $('#pText').textContent = 'Excelを作成中...'; $('#pBar').style.width = '0';
+    let zip = null;
+    try {
+      zip = await xlBuild(tpl, list, (i, n) => { $('#pText').textContent = `Excelを作成中... ${Math.min(i + 1, n)} / ${n}枚`; $('#pBar').style.width = `${(i / n) * 95}%`; });
+    } catch (err) {
+      console.error(err);
+      prog.hidden = true; XL.busy = false;
+      closeModal();
+      xlMsg('Excel Photo Album', err instanceof XlError ? err.message : `Excelファイルの作成に失敗しました。\n${err.message || err}`);
+      return;
+    }
+    prog.hidden = true;
+    closeModal();
+    try {
+      await download(new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), fname);
+      xlMsg('Excel Photo Album', `Excel Photo Albumを作成しました。\n出力写真：${list.length}枚\nファイル：${fname}`);
+    } catch (err) {
+      console.error(err);
+      xlMsg('Excel Photo Album', 'Excelファイルのダウンロードに失敗しました。もう一度お試しください。');
+    } finally { XL.busy = false; }
+  });
+}
+function openXlOrder() {
+  const posName = ['1段目左', '1段目右', '2段目左', '2段目右', '3段目左', '3段目右'];
+  const dlg = openModal({
+    title: 'Excel出力の並べ替え', wide: true,
+    body: '<p class="hint" style="margin-top:0">「Excel出力に使う」写真の出力順です。↑↓で並べ替えると、この訪船の並び順として保存され、他のメンバーにも共有されます。</p><div id="xoList"></div>',
+    footer: '<button data-m="reset">標準の並びに戻す</button><span class="sp"></span><button data-act="close">閉じる</button><button class="primary xlgo" data-m="make">Excel Photo Album</button>'
+  });
+  const box = dlg.querySelector('#xoList');
+  let ids = xlOrdered().map(p => p.id);
+  const draw = () => {
+    const y = box.parentElement.scrollTop;
+    if (!ids.length) { box.innerHTML = '<p class="empty">「Excel出力に使う」写真がありません。写真ビューアまたは写真一覧で選んでください。</p>'; return; }
+    box.innerHTML = ids.map((id, i) => {
+      const p = S.photos.find(x => x.id === id); if (!p) return '';
+      const l = S.locMap.get(p.loc), eq = eqById(p.equipId);
+      const li = [l ? l.name : '', eq ? eqLabel(eq) : '', (p.items || []).map(itemName).join(' / ')];
+      return `<div class="xo-row"><span class="xo-no">${i + 1}<small>P${Math.floor(i / 6) + 1} ${posName[i % 6]}</small></span>
+        <img data-thumb="${p.id}" alt="">
+        <div class="xo-txt"><b>${esc(li[0] || '（場所未設定）')}</b>${li.slice(1).filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('')}<span class="hint">${esc(plainText(p.comment).split('\n')[0] || '（コメントなし）')}</span></div>
+        <div class="xo-btns"><button data-m="top" data-i="${i}" ${i ? '' : 'disabled'} aria-label="先頭へ">⤒</button><button data-m="up" data-i="${i}" ${i ? '' : 'disabled'} aria-label="上へ">↑</button><button data-m="down" data-i="${i}" ${i < ids.length - 1 ? '' : 'disabled'} aria-label="下へ">↓</button><button data-m="bottom" data-i="${i}" ${i < ids.length - 1 ? '' : 'disabled'} aria-label="末尾へ">⤓</button></div></div>`;
+    }).join('');
+    hydrate(box);
+    box.parentElement.scrollTop = y;
+  };
+  draw();
+  dlg.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    const m = b.dataset.m, i = +b.dataset.i;
+    if (m === 'make') { closeModal(); openXlAlbum(); return; }
+    if (m === 'reset') {
+      if (!confirm('並び順を標準（大カテゴリ → 小カテゴリ → 撮影順）に戻しますか？')) return;
+      await xlSaveOrder([]); ids = xlOrdered().map(p => p.id); draw(); toast('標準の並びに戻しました'); return;
+    }
+    const [x] = ids.splice(i, 1);
+    const to = m === 'top' ? 0 : m === 'bottom' ? ids.length : m === 'up' ? i - 1 : i + 1;
+    ids.splice(to, 0, x);
+    draw();
+    await xlSaveOrder([...ids]);
+  });
 }
 
 /* ================= バックアップ ================= */
@@ -3297,6 +3803,14 @@ function bind() {
       case 'search': openSearch(); break;
       case 'backup': openBackup(); break;
       case 'export': openExport(); break;
+      case 'xlalbum': if (S.visit) openXlAlbum(); else toast('訪船を選択してください'); break;
+      case 'xlorder': if (S.visit) openXlOrder(); else toast('訪船を選択してください'); break;
+      case 'xlVisit': {
+        const id = t.dataset.id;
+        if (!S.visit || S.visit.id !== id) { await openVisit(id); S.tab = 'visits'; render(); }
+        openXlAlbum();
+        break;
+      }
       case 'sync': openSync(); break;
       case 'menu': { const m = $('#menu'); m.hidden = !m.hidden; t.setAttribute('aria-expanded', String(!m.hidden)); e.stopPropagation(); return; }
       case 'shoot': openCam(); break;
